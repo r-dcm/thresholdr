@@ -14,7 +14,7 @@
 #'
 #' generate_truth(runif(5))
 generate_truth <- function(estimates) {
-  estimate <- check_double(estimates, lb = 0, ub = 1)
+  estimates <- check_double(estimates, lb = 0, ub = 1)
 
   vapply(estimates, \(x) rbern(n = 1, prob = x), integer(1))
 }

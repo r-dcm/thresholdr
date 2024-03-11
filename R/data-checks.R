@@ -79,7 +79,7 @@ check_double <- function(x, lb = -Inf, ub = Inf, inclusive = TRUE,
   }
 
   if (any(vapply(x, check_lb, logical(1), lb)) ||
-      any(vapply(x, check_ub, logical(1), ub))) {
+        any(vapply(x, check_ub, logical(1), ub))) {
     msg <- if (is.infinite(lb)) {
       glue::glue("be less than {ub}")
     } else if (is.infinite(ub)) {

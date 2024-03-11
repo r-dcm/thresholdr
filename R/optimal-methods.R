@@ -90,9 +90,9 @@ calc_topleft <- function(estimates, truth) {
 
   tl <- roc |>
     dplyr::mutate(topleft = ((1 - .data$sensitivity) ^ 2) +
-                    ((1 - specificity) ^ 2)) |>
+                    ((1 - .data$specificity) ^ 2)) |>
     dplyr::slice_min(order_by = .data$topleft, n = 1, with_ties = FALSE) |>
-    dplyr::pull(.threshold)
+    dplyr::pull(".threshold")
 
   return(tl)
 }

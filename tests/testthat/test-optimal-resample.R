@@ -101,42 +101,42 @@ test_that("comparison thresholds work", {
   expect_equal(length(rs_youden$.threshold), 3L)
   expect_equal(vapply(rs_youden$pr_auc, posterior::ndraws, integer(1)),
                c(100L, 100L, 100L))
-  expect_equal(vapply(rs_youden$pr_auc,
-                      \(x) {
-                        posterior::E(posterior::rvar_is_na(x))
-                      },
-                      double(1)),
-               c(0, 1, 1))
+  expect_equal(
+    vapply(rs_youden$pr_auc,
+           \(x) posterior::E(posterior::rvar_is_na(x)),
+           double(1)),
+    c(0, 1, 1)
+  )
   expect_equal(vapply(rs_youden$sens, posterior::ndraws, integer(1)),
                c(100L, 100L, 100L))
-  expect_equal(vapply(rs_youden$sens,
-                      \(x) {
-                        posterior::E(posterior::rvar_is_na(x))
-                      },
-                      double(1)),
-               c(0, 0, 0))
+  expect_equal(
+    vapply(rs_youden$sens,
+           \(x) posterior::E(posterior::rvar_is_na(x)),
+           double(1)),
+    c(0, 0, 0)
+  )
   expect_equal(vapply(rs_youden$spec, posterior::ndraws, integer(1)),
                c(100L, 100L, 100L))
-  expect_equal(vapply(rs_youden$spec,
-                      \(x) {
-                        posterior::E(posterior::rvar_is_na(x))
-                      },
-                      double(1)),
-               c(0, 0, 0))
+  expect_equal(
+    vapply(rs_youden$spec,
+           \(x) posterior::E(posterior::rvar_is_na(x)),
+           double(1)),
+    c(0, 0, 0)
+  )
   expect_equal(vapply(rs_youden$ppv, posterior::ndraws, integer(1)),
                c(100L, 100L, 100L))
-  expect_equal(vapply(rs_youden$ppv,
-                      \(x) {
-                        posterior::E(posterior::rvar_is_na(x))
-                      },
-                      double(1)),
-               c(0, 0, 0))
+  expect_equal(
+    vapply(rs_youden$ppv,
+           \(x) posterior::E(posterior::rvar_is_na(x)),
+           double(1)),
+    c(0, 0, 0)
+  )
   expect_equal(vapply(rs_youden$distance, posterior::ndraws, integer(1)),
                c(100L, 100L, 100L))
-  expect_equal(vapply(rs_youden$distance,
-                      \(x) {
-                        posterior::E(posterior::rvar_is_na(x))
-                      },
-                      double(1)),
-               c(0, 0, 0))
+  expect_equal(
+    vapply(rs_youden$distance,
+           \(x) posterior::E(posterior::rvar_is_na(x)),
+           double(1)),
+    c(0, 0, 0)
+  )
 })

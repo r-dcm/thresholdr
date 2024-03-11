@@ -7,10 +7,10 @@ test_that("multiplication works", {
   expect_true(all(truth %in% c(0L, 1L)))
 
   check_probs <- vapply(1:10000,
-                  \(x) {
-                    generate_truth(estimates = estimates)
-                  },
-                  integer(length(estimates))) |>
+                        \(x) {
+                          generate_truth(estimates = estimates)
+                        },
+                        integer(length(estimates))) |>
     rowMeans()
 
   expect_equal(check_probs, estimates, tolerance = 0.3)

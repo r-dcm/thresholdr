@@ -92,60 +92,65 @@ optimal_resample <- function(estimates, optimal_method, samples = 1000,
                  estimates = list(estimates)) |>
 
     # create data
-    dplyr::mutate(truth = lapply(estimates, generate_truth),
-                  dat = purrr::map2(.data$estimates, .data$truth,
-                                    estimate_tibble)
+    dplyr::mutate(
+      truth = lapply(estimates, generate_truth),
+      dat = purrr::map2(.data$estimates, .data$truth,
+                        estimate_tibble)
     ) |>
 
     # calculate thresholds
-    dplyr::mutate(threshold = purrr::map2_dbl(.data$estimates, .data$truth,
-                                              optimal_function),
-                  wt_func := purrr::map_dbl(
-                    .data$dat,
-                    \(x) {
-                      weight_function(x, truth = "truth", "estimate",
-                                      event_level = "second") |>
-                        dplyr::pull(.data$.estimate)
-                    }
-                  ),
-                  weight = purrr::map_dbl(
-                    .data$wt_func,
-                    \(x, full, weight_by) {
-                      if (weight_by == "identity") return(1)
-                      1 / sum(abs(x - full))
-                    },
-                    full = .data$wt_func, weight_by = weight_by
-                  ),
-                  wt_threshold = weighted.mean(.data$threshold, .data$weight)
+    dplyr::mutate(
+      threshold = purrr::map2_dbl(.data$estimates, .data$truth,
+                                  optimal_function),
+      wt_func = purrr::map_dbl(
+        .data$dat,
+        \(x) {
+          weight_function(x, truth = "truth", "estimate",
+                          event_level = "second") |>
+            dplyr::pull(.data$.estimate)
+        }
+      ),
+      weight = purrr::map_dbl(
+        .data$wt_func,
+        \(x, full, weight_by) {
+          if (weight_by == "identity") return(1)
+          1 / sum(abs(x - full))
+        },
+        full = .data$wt_func, weight_by = weight_by
+      ),
+      wt_threshold = weighted.mean(.data$threshold, .data$weight)
     ) |>
 
     # calculate performance
-    dplyr::mutate(results = purrr::map2(
-                    .data$dat, .data$wt_threshold,
-                    \(x, y, comp, metrics) {
-                      probably::threshold_perf(
-                        x,
-                        truth = "truth",
-                        estimate = "estimate",
-                        thresholds = c(y, comp),
-                        event_level = "second",
-                        metrics = metrics
-                      ) |>
-                        dplyr::select(".threshold", ".metric", ".estimate") |>
-                        tidyr::pivot_wider(names_from = ".metric",
-                                           values_from = ".estimate")
-                    },
-                    comp = comp_thresholds, metrics = metrics
-                  )
+    dplyr::mutate(
+      results = purrr::map2(
+        .data$dat, .data$wt_threshold,
+        \(x, y, comp, metrics) {
+          probably::threshold_perf(
+            x,
+            truth = "truth",
+            estimate = "estimate",
+            thresholds = c(y, comp),
+            event_level = "second",
+            metrics = metrics
+          ) |>
+            dplyr::select(".threshold", ".metric", ".estimate") |>
+            tidyr::pivot_wider(names_from = ".metric",
+                               values_from = ".estimate")
+        },
+        comp = comp_thresholds, metrics = metrics
+      )
     ) |>
 
     # clean-up
     dplyr::select(-c("estimates", "truth", "dat")) |>
     tidyr::unnest("results") |>
-    dplyr::mutate(wt_func = dplyr::case_when(
-      .data$.threshold %in% comp_thresholds ~ NA_real_,
-      .default = .data$wt_func
-    )) |>
+    dplyr::mutate(
+      wt_func = dplyr::case_when(
+        .data$.threshold %in% comp_thresholds ~ NA_real_,
+        .default = .data$wt_func
+      )
+    ) |>
     dplyr::rename(!!weight_by := "wt_func") |>
     dplyr::select("sample_id", !!weight_by, ".threshold":dplyr::last_col(),
                   -dplyr::any_of("identity")) |>
