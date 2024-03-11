@@ -7,8 +7,8 @@
 #'
 #' @details
 #' Youden's J statistic (Youden, 1950) is defined as `sensitivty` +
-#' `specificity` - 1. As such, the value of the J-index ranges from [0, 1], and
-#' is 1 when there are no false positive and no false negatives (i.e.,
+#' `specificity` - 1. As such, the value of the J-index ranges from \[0, 1\],
+#' and is 1 when there are no false positive and no false negatives (i.e.,
 #' sensitivity and specificity). The J-index is calculated for each possible
 #' threshold defined by the ROC curve (e.g., [create_roc()]).  The optimality
 #' criterion is then defined as:

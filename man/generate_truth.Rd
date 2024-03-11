@@ -7,7 +7,7 @@
 generate_truth(estimates)
 }
 \arguments{
-\item{estimate}{A vector of probabilities}
+\item{estimates}{A vector of probabilities}
 }
 \value{
 An integer vector of \code{0} and \code{1}, the same length as \code{estimate}.

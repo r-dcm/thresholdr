@@ -19,11 +19,15 @@ BugReports: https://github.com/r-dcm/thresholdr/issues
 Depends: 
     R (>= 4.1.0)
 Imports: 
+    cli,
+    dplyr,
     glue,
+    posterior,
     probably,
-    pROC,
+    purrr,
     rlang,
     tibble,
+    tidyr,
     yardstick
 Suggests: 
     knitr,

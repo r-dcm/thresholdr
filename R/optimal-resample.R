@@ -62,12 +62,7 @@
 #'
 #' @examples
 #' est <- runif(100)
-#' optimal_resample(estimates = est, optimal_method = "youden", samples = 500)
-#'
-#' optimal_resample(estimates = est, optimal_method = "youden", samples = 500,
-#'                  weight_by = "roc_auc",
-#'                  metrics = yardstick::metric_set(yardstick::ppv,
-#'                                                  yardstick::f_meas))
+#' optimal_resample(estimates = est, optimal_method = "youden", samples = 200)
 optimal_resample <- function(estimates, optimal_method, samples = 1000,
                              weight_by = NULL, comp_thresholds = NULL,
                              metrics = NULL) {
@@ -118,7 +113,7 @@ optimal_resample <- function(estimates, optimal_method, samples = 1000,
         },
         full = .data$wt_func, weight_by = weight_by
       ),
-      wt_threshold = weighted.mean(.data$threshold, .data$weight)
+      wt_threshold = stats::weighted.mean(.data$threshold, .data$weight)
     ) |>
 
     # calculate performance

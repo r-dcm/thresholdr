@@ -4,7 +4,7 @@
 #' practice, it is likely useful generate multiple truth values that can be
 #' tested.
 #'
-#' @param estimate A vector of probabilities
+#' @param estimates A vector of probabilities
 #'
 #' @return An integer vector of `0` and `1`, the same length as `estimate`.
 #' @export

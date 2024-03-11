@@ -84,10 +84,5 @@ thresholds. To change the metrics that are provided by default, specify new
 }
 \examples{
 est <- runif(100)
-optimal_resample(estimates = est, optimal_method = "youden", samples = 500)
-
-optimal_resample(estimates = est, optimal_method = "youden", samples = 500,
-                 weight_by = "roc_auc",
-                 metrics = yardstick::metric_set(yardstick::ppv,
-                                                 yardstick::f_meas))
+optimal_resample(estimates = est, optimal_method = "youden", samples = 200)
 }
