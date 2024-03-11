@@ -96,9 +96,10 @@ test_that("check_integer", {
   expect_s3_class(err, "rlang_error")
   expect_match(err$message, "length 1")
 
-  err <- rlang::catch_cnd(check_integer(1:2, exp_length = c(1, 5)))
+  blue <- 1:2
+  err <- rlang::catch_cnd(check_integer(blue, exp_length = c(1, 5)))
   expect_s3_class(err, "rlang_error")
-  expect_match(err$message, "length 1 or 5")
+  expect_match(err$message, "`blue` must be of length 1 or 5")
 
   err <- rlang::catch_cnd(check_integer(NA_integer_))
   expect_s3_class(err, "rlang_error")

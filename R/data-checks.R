@@ -11,7 +11,9 @@
 #' @return An error message created by [cli::cli_abort()].
 #' @noRd
 abort_bad_argument <- function(arg, must, not = NULL, extra = NULL,
-                               custom = NULL, call) {
+                               custom = NULL, ..., call) {
+  extra_arg <- list(...)
+
   msg <- glue::glue("`{arg}` must {must}")
   if (!is.null(not)) {
     msg <- glue::glue("{msg}; not {not}")
@@ -51,13 +53,9 @@ check_double <- function(x, lb = -Inf, ub = Inf, inclusive = TRUE,
                          call = rlang::caller_env()) {
   if (is.null(x) && allow_null) return(x)
 
-  if (inclusive) {
-    check_lb <- function(.x, .y) .x < .y
-    check_ub <- function(.x, .y) .x > .y
-  } else if (!inclusive) {
-    check_lb <- function(.x, .y) .x <= .y
-    check_ub <- function(.x, .y) .x >= .y
-  }
+  dbl_bounds <- check_bounds(type = "dbl", inclusive = inclusive)
+  check_lb <- dbl_bounds$check_lb
+  check_ub <- dbl_bounds$check_ub
 
   if (!is.numeric(x)) {
     abort_bad_argument(arg = arg, must = "be of type numeric", not = typeof(x),
@@ -68,25 +66,11 @@ check_double <- function(x, lb = -Inf, ub = Inf, inclusive = TRUE,
     abort_bad_argument(arg = arg, must = "be non-missing", call = call)
   }
 
-  if (!is.null(exp_length) && !(length(x) %in% exp_length)) {
-    abort_bad_argument(
-      arg = arg,
-      must = glue::glue("be of length ",
-                        "{knitr::combine_words(exp_length, and = ' or ')}"),
-      not = length(x),
-      call = call
-    )
-  }
+  check_length(x = x, exp_length = exp_length, arg = arg, call = call)
 
   if (any(vapply(x, check_lb, logical(1), lb)) ||
         any(vapply(x, check_ub, logical(1), ub))) {
-    msg <- if (is.infinite(lb)) {
-      glue::glue("be less than {ub}")
-    } else if (is.infinite(ub)) {
-      glue::glue("be greater than {lb}")
-    } else {
-      glue::glue("be between {lb} and {ub}")
-    }
+    msg <- bounded_error(lb, ub)
     abort_bad_argument(arg = arg, must = msg, call = call)
   }
 
@@ -120,13 +104,10 @@ check_integer <- function(x, lb = -Inf, ub = Inf, inclusive = TRUE,
                           call = rlang::caller_env()) {
   if (is.null(x) && allow_null) return(x)
 
-  if (inclusive) {
-    check_lb <- lb
-    check_ub <- ub
-  } else if (!inclusive) {
-    check_lb <- lb + 1L
-    check_ub <- ub - 1L
-  }
+  int_bounds <- check_bounds(type = "int", inclusive = inclusive,
+                             lb = lb, ub = ub)
+  check_lb <- int_bounds$check_lb
+  check_ub <- int_bounds$check_ub
 
   if (!is.numeric(x)) {
     abort_bad_argument(arg = arg, must = "be of type numeric", not = typeof(x),
@@ -138,34 +119,15 @@ check_integer <- function(x, lb = -Inf, ub = Inf, inclusive = TRUE,
     abort_bad_argument(arg = arg, must = "be non-missing", call = call)
   }
 
-  if (!is.null(exp_length) && !(length(x_int) %in% exp_length)) {
-    abort_bad_argument(
-      arg = arg,
-      must = glue::glue("be of length ",
-                        "{knitr::combine_words(exp_length, and = ' or ')}"),
-      not = length(x),
-      call = call
-    )
-  }
+  check_length(x = x_int, exp_length = exp_length, arg = arg, call = call)
 
   if (any(x != x_int)) {
-    msg <- if (length(x_int) == 1) {
-      "be an integer value"
-    } else {
-      "be integer values"
-    }
-
-    abort_bad_argument(arg = arg, must = msg, call = call)
+    msg <- "be{cli::qty(length(extra_arg$x_int))}{? an/} integer value{?/s}"
+    abort_bad_argument(arg = arg, must = msg, x_int = x_int, call = call)
   }
 
   if (any(x_int < check_lb) || any(x_int > check_ub)) {
-    msg <- if (is.infinite(lb)) {
-      glue::glue("be less than {ub}")
-    } else if (is.infinite(ub)) {
-      glue::glue("be greater than {lb}")
-    } else {
-      glue::glue("be between {lb} and {ub}")
-    }
+    msg <- msg <- bounded_error(lb, ub)
     abort_bad_argument(arg = arg, must = msg, call = call)
   }
 
