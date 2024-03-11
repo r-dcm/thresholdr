@@ -22,6 +22,30 @@
     <loc>https://r-dcm.github.io/thresholdr/index.html</loc>
   </url>
   <url>
+    <loc>https://r-dcm.github.io/thresholdr/reference/calc_topleft.html</loc>
+  </url>
+  <url>
+    <loc>https://r-dcm.github.io/thresholdr/reference/calc_youden.html</loc>
+  </url>
+  <url>
+    <loc>https://r-dcm.github.io/thresholdr/reference/create_roc.html</loc>
+  </url>
+  <url>
+    <loc>https://r-dcm.github.io/thresholdr/reference/dcm_probs.html</loc>
+  </url>
+  <url>
+    <loc>https://r-dcm.github.io/thresholdr/reference/generate_truth.html</loc>
+  </url>
+  <url>
     <loc>https://r-dcm.github.io/thresholdr/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>https://r-dcm.github.io/thresholdr/reference/optimal_resample.html</loc>
+  </url>
+  <url>
+    <loc>https://r-dcm.github.io/thresholdr/reference/rbern.html</loc>
+  </url>
+  <url>
+    <loc>https://r-dcm.github.io/thresholdr/reference/thresholdr-package.html</loc>
   </url>
 </urlset>
