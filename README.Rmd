@@ -22,37 +22,60 @@ knitr::opts_chunk$set(
 [![Codecov test coverage](https://codecov.io/gh/r-dcm/thresholdr/branch/main/graph/badge.svg)](https://app.codecov.io/gh/r-dcm/thresholdr?branch=main)
 <!-- badges: end -->
 
-The goal of thresholdr is to ...
+The goal of thresholdr is to estimate optimal probability thresholds for determining classifications when the true state is unknown, such as when using diagnostic classification models.
 
 ## Installation
 
 You can install the development version of thresholdr like so:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+# install.packages("remotes")
+remotes::install_github("r-dcm/thresholdr")
 ```
 
-## Example
+## Example usage
 
-This is a basic example which shows you how to solve a common problem:
+There the true classifications are known, we can determine the optimal threshold using a supported method, such as Youden's J statistic.
+For example, using simulated data where the true attribute classifications are known, we can calculate the optimal probability classification threshold using `calc_youden()`:
 
 ```{r example}
 library(thresholdr)
-## basic example code
+
+calc_youden(estimates = dcm_probs$att1$estimate,
+            truth = dcm_probs$att1$truth)
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+However, in practice the true attribute classifications are unknown. In this scenario, we can estimate what the optimal threshold should be using, for example, resampling:
 
-```{r cars}
-summary(cars)
+```{r}
+optimal_resample(estimates = dcm_probs$att1$estimate, optimal_method = "youden")
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
+This results in a threshold that is similar, although slightly higher, than what we know the true optimal threshold should be.
+We can also visualize our estimate on an ROC curve.
+Here again we see that our estimated optimal threshold from the resamples are very close to the true value.
 
-You can also embed plots, for example:
+```{r echo = FALSE}
+library(tidyverse)
+library(posterior)
 
-```{r pressure, echo = FALSE}
-plot(pressure)
+yd_op <- calc_youden(estimates = dcm_probs$att1$estimate,
+                     truth = dcm_probs$att1$truth)
+yd_rs <- optimal_resample(estimates = dcm_probs$att1$estimate,
+                          optimal_method = "youden")
+
+create_roc(estimates = dcm_probs$att1$estimate,
+           truth = dcm_probs$att1$truth) |> 
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+  geom_path() +
+  geom_point(data = ~filter(.x, .threshold == yd_op),
+             aes(x = 1 - specificity, y = sensitivity,
+                 color = "Youden's J")) +
+  geom_point(data = yd_rs,
+             aes(x = 1 - E(specificity), y = E(sensitivity),
+                 color = "Resample Estimate")) +
+  geom_abline(lty = 3) +
+  coord_equal() +
+  theme_bw()
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
