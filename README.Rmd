@@ -11,6 +11,8 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+
+options(tidyverse.quiet = TRUE)
 ```
 
 # thresholdr
@@ -55,7 +57,7 @@ This results in a threshold that is similar, although slightly higher, than what
 We can also visualize our estimate on an ROC curve.
 Here again we see that our estimated optimal threshold from the resamples are very close to the true value.
 
-```{r echo = FALSE}
+```{r echo = FALSE, message = FALSE}
 library(tidyverse)
 library(posterior)
 
