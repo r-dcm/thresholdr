@@ -2,8 +2,8 @@ pandoc: 3.1.11
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles: {}
-last_built: 2024-03-12T13:57Z
+last_built: 2024-03-12T14:20Z
 urls:
-  reference: https://r-dcm.github.io/thresholdr/reference
-  article: https://r-dcm.github.io/thresholdr/articles
+  reference: https:/thresholdr.measr.info/reference
+  article: https:/thresholdr.measr.info/articles
 

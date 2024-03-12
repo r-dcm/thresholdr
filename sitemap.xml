@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://r-dcm.github.io/thresholdr/404.html</loc>
+    <loc>https:/thresholdr.measr.info/404.html</loc>
   </url>
   <url>
-    <loc>https://r-dcm.github.io/thresholdr/CODE_OF_CONDUCT.html</loc>
+    <loc>https:/thresholdr.measr.info/CODE_OF_CONDUCT.html</loc>
   </url>
   <url>
-    <loc>https://r-dcm.github.io/thresholdr/CONTRIBUTING.html</loc>
+    <loc>https:/thresholdr.measr.info/CONTRIBUTING.html</loc>
   </url>
   <url>
-    <loc>https://r-dcm.github.io/thresholdr/LICENSE-text.html</loc>
+    <loc>https:/thresholdr.measr.info/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>https://r-dcm.github.io/thresholdr/LICENSE.html</loc>
+    <loc>https:/thresholdr.measr.info/LICENSE.html</loc>
   </url>
   <url>
-    <loc>https://r-dcm.github.io/thresholdr/authors.html</loc>
+    <loc>https:/thresholdr.measr.info/authors.html</loc>
   </url>
   <url>
-    <loc>https://r-dcm.github.io/thresholdr/index.html</loc>
+    <loc>https:/thresholdr.measr.info/index.html</loc>
   </url>
   <url>
-    <loc>https://r-dcm.github.io/thresholdr/reference/calc_topleft.html</loc>
+    <loc>https:/thresholdr.measr.info/reference/calc_topleft.html</loc>
   </url>
   <url>
-    <loc>https://r-dcm.github.io/thresholdr/reference/calc_youden.html</loc>
+    <loc>https:/thresholdr.measr.info/reference/calc_youden.html</loc>
   </url>
   <url>
-    <loc>https://r-dcm.github.io/thresholdr/reference/create_roc.html</loc>
+    <loc>https:/thresholdr.measr.info/reference/create_roc.html</loc>
   </url>
   <url>
-    <loc>https://r-dcm.github.io/thresholdr/reference/dcm_probs.html</loc>
+    <loc>https:/thresholdr.measr.info/reference/dcm_probs.html</loc>
   </url>
   <url>
-    <loc>https://r-dcm.github.io/thresholdr/reference/generate_truth.html</loc>
+    <loc>https:/thresholdr.measr.info/reference/generate_truth.html</loc>
   </url>
   <url>
-    <loc>https://r-dcm.github.io/thresholdr/reference/index.html</loc>
+    <loc>https:/thresholdr.measr.info/reference/index.html</loc>
   </url>
   <url>
-    <loc>https://r-dcm.github.io/thresholdr/reference/optimal_resample.html</loc>
+    <loc>https:/thresholdr.measr.info/reference/optimal_resample.html</loc>
   </url>
   <url>
-    <loc>https://r-dcm.github.io/thresholdr/reference/rbern.html</loc>
+    <loc>https:/thresholdr.measr.info/reference/rbern.html</loc>
   </url>
   <url>
-    <loc>https://r-dcm.github.io/thresholdr/reference/thresholdr-package.html</loc>
+    <loc>https:/thresholdr.measr.info/reference/thresholdr-package.html</loc>
   </url>
 </urlset>
