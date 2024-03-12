@@ -1,5 +1,5 @@
 Package: thresholdr
-Title: What the Package Does (One Line, Title Case)
+Title: Estimate Optimal Probability Classification Thresholds for Diagnostic Models
 Version: 0.0.0.9000
 Authors@R: c(
     person("W. Jake", "Thompson", , "wjakethompson@gmail.com", role = c("aut", "cre"),
@@ -12,7 +12,9 @@ Description: Diagnostic classification models are confirmatory latent class
     the assessed skills (Bradshaw, 2016 <doi:10.1002/9781118956588.ch13>).
     Often, results based on these models are reported as classifications, using
     0.5 as the probability threshold for classification (Bradshaw & Levy,
-    2019 <doi:10.1111/emip.12247>).
+    2019 <doi:10.1111/emip.12247>). Instead, we can use resampling methods to
+    estimate a different classification threshold that optimizes sensitivity
+    and specificity.
 License: MIT + file LICENSE
 URL: https://thresholdr.measr.info, https://github.com/r-dcm/thresholdr
 BugReports: https://github.com/r-dcm/thresholdr/issues
