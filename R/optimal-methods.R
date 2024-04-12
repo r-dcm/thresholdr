@@ -159,12 +159,12 @@ calc_cz <- function(estimates, truth) {
 #' @inheritParams create_roc
 #'
 #' @details
-#' The G-mean method (Kubat & Matwin, 1997) is defined as the product of sensitivity and specificity squared
+#' The G-mean method (Kubat & Matwin, 1997) is defined as the square root of the product of sensitivity and specificity
 #' at a given threshold. The optimal threshold is the threshold with the greatest g-mean.
 #' 
 #' The optimality criterion is then defined as:
 #'
-#' \deqn{\text{max}(sensitivity * specificity)}
+#' \deqn{\text{max}\sqrt{(sensitivity * specificity)}}
 #'
 #' @return A numeric scalar representing the optimal probability threshold.
 #' @export
