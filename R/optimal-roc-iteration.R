@@ -21,7 +21,8 @@ optimal_roc_iteration <- function(estimates, optimal_method, converge = 0.0001,
   # initial state -----
   truth <- generate_truth(estimates)
   threshold <- optimal_function(estimates = estimates, truth = truth)
-  auc <- yardstick::roc_auc(estimate_tibble(estimates, truth),
+  df_tbl <- estimate_tibble(estimates, truth)
+  auc <- yardstick::roc_auc(df_tbl,
                             truth = "truth", "estimate",
                             event_level = "second")
 
@@ -33,7 +34,7 @@ optimal_roc_iteration <- function(estimates, optimal_method, converge = 0.0001,
     # * Randomly generate truth, weighted by current value of `threshold`
     # * E.g., estimate of .8 should be less likely to give value of 1 if the
     #   `threshold` is greater than .5, but still more likely than .6, .7, etc.
-    # iter_truth <- ...
+    iter_truth <- generate_truth(dist_thresh(df_tbl, threshold))
 
     iter_threshold <- optimal_function(estimates = estimates,
                                        truth = iter_truth)
