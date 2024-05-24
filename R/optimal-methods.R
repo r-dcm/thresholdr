@@ -96,3 +96,107 @@ calc_topleft <- function(estimates, truth) {
 
   return(tl)
 }
+
+
+#' Concordance probability method
+#'
+#' Calculate the optimal probability classification threshold using the
+#' concordance probability method (CZ).
+#'
+#' @inheritParams create_roc
+#'
+#' @details
+#' The concordance probability method (Liu, 2012) is defined as the product of
+#' the sensitivity and specificity at a given threshold cut-point. By utilizing
+#' the product of both metrics, the value for the cut-point remains within the
+#' range of \[0, 1\]. The optimal threshold is the cut-point that maximizes
+#' the area of the rectangle related to the ROC curve.
+#'
+#' The optimality criterion is then defined as:
+#'
+#' \deqn{\text{max}(sensitivity * specificity)}
+#'
+#' @return A numeric scalar representing the optimal probability threshold.
+#' @export
+#' @family Optimal threshold methods
+#'
+#' @examples
+#' calc_cz(estimates = dcm_probs$att1$estimate,
+#'             truth = dcm_probs$att1$truth)
+#'
+#' calc_cz(estimates = dcm_probs$att2$estimate,
+#'             truth = dcm_probs$att2$truth)
+#'
+#' calc_cz(estimates = dcm_probs$att3$estimate,
+#'             truth = dcm_probs$att3$truth)
+#'
+#' @references Liu, X. (2012). Classification accuracy and cut point selection.
+#'   *Statistics in Medicine, 31*(23), 2676-2686.
+#'   \doi{10.1002/sim.4509}
+calc_cz <- function(estimates, truth) {
+  # input checks -----
+  estimates <- check_double(estimates, lb = 0, ub = 1)
+  truth <- check_integer(truth, lb = 0L, ub = 1L,
+                         exp_length = length(estimates))
+
+  # calculate threshold -----
+  roc <- create_roc(estimates = estimates, truth = truth)
+
+  cz <- roc |>
+    dplyr::mutate(cz = .data$sensitivity * .data$specificity) |>
+    dplyr::slice_max(order_by = .data$cz, n = 1, with_ties = FALSE) |>
+    dplyr::pull(".threshold")
+
+  return(cz)
+}
+
+
+#' G-mean method
+#'
+#' Calculate the optimal probability classification threshold using the
+#' G-Mean method.
+#'
+#' @inheritParams create_roc
+#'
+#' @details
+#' The G-mean method (Kubat & Matwin, 1997) is defined as the square root of the
+#' product of sensitivity and specificity at a given threshold. The optimal
+#' threshold is the threshold with the greatest g-mean.
+#'
+#' The optimality criterion is then defined as:
+#'
+#' \deqn{\text{max}\sqrt{(sensitivity * specificity)}}
+#'
+#' @return A numeric scalar representing the optimal probability threshold.
+#' @export
+#' @family Optimal threshold methods
+#'
+#' @examples
+#' calc_gmean(estimates = dcm_probs$att1$estimate,
+#'             truth = dcm_probs$att1$truth)
+#'
+#' calc_gmean(estimates = dcm_probs$att2$estimate,
+#'             truth = dcm_probs$att2$truth)
+#'
+#' calc_gmean(estimates = dcm_probs$att3$estimate,
+#'             truth = dcm_probs$att3$truth)
+#'
+#' @references Kubat, M. & Matwin, S. (1997, July 8-12). *Addressing the curse
+#' of imbalanced training sets: One-sided selection* \[Paper presentation\].
+#' International Conference on Machine Learning, Nashville, TN.
+calc_gmean <- function(estimates, truth) {
+  # input checks -----
+  estimates <- check_double(estimates, lb = 0, ub = 1)
+  truth <- check_integer(truth, lb = 0L, ub = 1L,
+                         exp_length = length(estimates))
+
+  # calculate threshold -----
+  roc <- create_roc(estimates = estimates, truth = truth)
+
+  g <- roc |>
+    dplyr::mutate(g = sqrt(.data$sensitivity * .data$specificity)) |>
+    dplyr::slice_max(order_by = .data$g, n = 1, with_ties = FALSE) |>
+    dplyr::pull(".threshold")
+
+  return(g)
+}

@@ -17,7 +17,7 @@ optimal_resample(
 \item{estimates}{A vector of probabilities.}
 
 \item{optimal_method}{The method for estimating the optimal threshold. One of
-"youden", "topleft".}
+"youden", "topleft", "cz", "gmean".}
 
 \item{samples}{The number of samples of generated true values to create.}
 

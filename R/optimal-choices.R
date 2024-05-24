@@ -3,7 +3,7 @@
 #' @return A vector of supported methods for identifying an optimal threshold.
 #' @noRd
 optimal_method_choices <- function() {
-  c("youden", "topleft")
+  c("youden", "topleft", "cz", "gmean")
 }
 
 
@@ -20,5 +20,7 @@ get_optimal_function <- function(method) {
   switch(method,
          "youden" = calc_youden,
          "topleft" = calc_topleft,
+         "cz" = calc_cz,
+         "gmean" = calc_gmean,
          cli::cli_abort("No function found for {.arg method = \"{method}\"}"))
 }
