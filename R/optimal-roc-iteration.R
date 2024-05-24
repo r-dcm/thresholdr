@@ -1,17 +1,25 @@
-estimates <- dcm_probs$att1$estimate
-optimal_method <- "topleft"
-converge <- 0.0001
-max_iter <- 1000
-comp_thresholds <- NULL
-metrics <- NULL
+# estimates <- dcm_probs$att1$estimate
+# optimal_method <- "topleft"
+# converge <- 0.0001
+# additional_criteria <- "roc_auc"
+# max_iter <- 1000
+# comp_thresholds <- NULL
+# metrics <- NULL
 
 optimal_roc_iteration <- function(estimates, optimal_method, converge = 0.0001,
-                                  max_iter = 1000,
+                                  additional_criteria = NULL, max_iter = 1000,
                                   comp_thresholds = NULL, metrics = NULL) {
   # check inputs -----
   estimates <- check_double(estimates, lb = 0, ub = 1)
   optimal_method <- rlang::arg_match(optimal_method, optimal_method_choices())
   converge <- check_double(converge, lb = 0, inclusive = FALSE, exp_length = 1)
+  converge_function <- if (is.null(additional_criteria)) {
+    additional_criteria <- "identity"
+    \(data, truth, ...) tibble::tibble(.estimate = 1)
+  } else {
+    check_prob_metric(additional_criteria)
+  }
+  max_iter <- check_integer(max_iter, lb = 0, inclusive = FALSE, exp_length = 1)
   comp_thresholds <- check_double(comp_thresholds, lb = 0, ub = 1,
                                   allow_null = TRUE)
 
@@ -21,40 +29,42 @@ optimal_roc_iteration <- function(estimates, optimal_method, converge = 0.0001,
   # initial state -----
   truth <- generate_truth(estimates)
   threshold <- optimal_function(estimates = estimates, truth = truth)
-  df_tbl <- estimate_tibble(estimates, truth)
-  auc <- yardstick::roc_auc(df_tbl,
+  conv <- converge_function(estimate_tibble(estimates, truth),
                             truth = "truth", "estimate",
-                            event_level = "second")
+                            event_level = "second") |>
+    dplyr::pull(".estimate")
 
   # iterate roc -----
-  conv <- FALSE
+  has_converged <- FALSE
   iter <- 1L
-  while(!conv && iter < max_iter) {
-    # NEED FUNCTION HERE
-    # * Randomly generate truth, weighted by current value of `threshold`
-    # * E.g., estimate of .8 should be less likely to give value of 1 if the
-    #   `threshold` is greater than .5, but still more likely than .6, .7, etc.
-    iter_truth <- generate_truth(dist_thresh(df_tbl, threshold))
+  while(!has_converged && iter <= max_iter) {
+    # iter_truth <- generate_truth(dist_thresh(estimate_tibble(estimates, truth), threshold))
+    iter_truth <- generate_weighted_truth(estimates, mu = threshold,
+                                          phi = 5)
 
     iter_threshold <- optimal_function(estimates = estimates,
                                        truth = iter_truth)
-    iter_auc <- yardstick::roc_auc(estimate_tibble(estimates, iter_truth),
+    iter_conv <- converge_function(estimate_tibble(estimates, iter_truth),
                                    truth = "truth", "estimate",
-                                   event_level = "second")
-    conv <- abs(iter_threshold - threshold) < converge &&
-      abs(iter_auc - auc) < converge
+                                   event_level = "second") |>
+      dplyr::pull(".estimate")
+    has_converged <- abs(iter_threshold - threshold) < converge &&
+      abs(iter_conv - conv) < converge
 
-    if (conv) {
+    if (has_converged) {
       final_threshold <- iter_threshold
-      final_auc <- iter_auc
-    } else if (iter >= max_iter) {
+      final_conv <- iter_conv
+      final_truth <- iter_truth
+    } else if (iter == max_iter) {
       cli::cli_warn(paste("Convergence criteria was not met before reaching",
                           "{.arg max_iter}"))
       final_threshold <- iter_threshold
-      final_auc <- iter_auc
+      final_conv <- iter_conv
+      break()
     } else {
       threshold <- iter_threshold
-      auc <- iter_auc
+      conv <- iter_conv
+      iter <- iter + 1
     }
   }
 }
