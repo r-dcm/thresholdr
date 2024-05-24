@@ -38,6 +38,7 @@ optimal_roc_iteration <- function(estimates, optimal_method, converge = 0.0001,
   has_converged <- FALSE
   iter <- 1L
   while(!has_converged && iter <= max_iter) {
+    # iter_truth <- generate_truth(dist_thresh(estimate_tibble(estimates, truth), threshold))
     iter_truth <- generate_weighted_truth(estimates, mu = threshold,
                                           phi = 5)
 
