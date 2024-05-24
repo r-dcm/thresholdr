@@ -6,7 +6,7 @@
 # comp_thresholds <- NULL
 # metrics <- NULL
 
-optimal_roc_iteration <- function(estimates, optimal_method, converge = 0.0001,
+optimal_iterate <- function(estimates, optimal_method, converge = 0.0001,
                                   additional_criteria = NULL, max_iter = 1000,
                                   comp_thresholds = NULL, metrics = NULL) {
   # check inputs -----
