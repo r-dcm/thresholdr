@@ -28,10 +28,10 @@
 #' [generate_truth()]. Then, the optimal threshold is calculated for each set of
 #' generated "true" values using the specified `optimal_method`.
 #'
-#' The final optimal threshold is then calculated the average of the thresholds
-#' that were estimated for each sample. If desired, a distance-weighted mean can
-#' be specified by supplying a class probability metric from the
-#' [yardstick][yardstick::yardstick-package] (e.g., [yardstick::roc_auc()]).
+#' The final optimal threshold is then calculated as the average of the
+#' thresholds that were estimated for each sample. If desired, a distance-
+#' weighted mean can be specified by supplying a class probability metric from
+#' the [yardstick][yardstick::yardstick-package] (e.g., [yardstick::roc_auc()]).
 #' When `weight_by` is specified, the chosen metric is computed for the
 #' provided `estimates` and each sample of generated "true" values. For example,
 #' we could calculate the area under the ROC curve (AUC) for each sample. The

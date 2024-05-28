@@ -60,10 +60,10 @@ For each sample requested, a new vector of "true" values is generated using
 \code{\link[=generate_truth]{generate_truth()}}. Then, the optimal threshold is calculated for each set of
 generated "true" values using the specified \code{optimal_method}.
 
-The final optimal threshold is then calculated the average of the thresholds
-that were estimated for each sample. If desired, a distance-weighted mean can
-be specified by supplying a class probability metric from the
-\link[yardstick:yardstick-package]{yardstick} (e.g., \code{\link[yardstick:roc_auc]{yardstick::roc_auc()}}).
+The final optimal threshold is then calculated as the average of the
+thresholds that were estimated for each sample. If desired, a distance-
+weighted mean can be specified by supplying a class probability metric from
+the \link[yardstick:yardstick-package]{yardstick} (e.g., \code{\link[yardstick:roc_auc]{yardstick::roc_auc()}}).
 When \code{weight_by} is specified, the chosen metric is computed for the
 provided \code{estimates} and each sample of generated "true" values. For example,
 we could calculate the area under the ROC curve (AUC) for each sample. The
