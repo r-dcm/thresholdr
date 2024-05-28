@@ -6,7 +6,7 @@
 \usage{
 optimal_iterate(
   estimates,
-  weight_method,
+  weighting_method,
   optimal_method,
   ...,
   additional_criterion = NULL,
@@ -19,8 +19,8 @@ optimal_iterate(
 \arguments{
 \item{estimates}{A vector of probabilities.}
 
-\item{weight_method}{The method for generating classifications, weighted by
-the current estimate of the optimal threshold. One of
+\item{weighting_method}{The method for generating classifications, weighted
+by the current estimate of the optimal threshold. One of
 "beta", "distance".}
 
 \item{optimal_method}{The method for estimating the optimal threshold. One of
@@ -66,12 +66,55 @@ Use iteration to estimate an optimal probability threshold when true
 classifications are unknown.
 }
 \details{
-Additional details...
+To initialize the iteration process, a vector of "true" values is generated
+using \code{\link[=generate_truth]{generate_truth()}}. Then, the optimal threshold is calculated using the
+set of generated "true" values and the specified \code{optimal_method}. A new
+vector of "true" values is then generated, with classifications biased in the
+direction of the calculated optimal threshold using the method specified by
+\code{weighting_method}. That is, \code{estimates} will be less likely to result in a
+classification 1 if the threshold is .8 than if it is .5. Using the updated
+vector of "true" values, a new optimal threshold is calculated. This proceeds
+for the specified number of iterations. The total number of iterations is
+given by \code{iter_burnin + iter_retain}; however, the first \code{iter_burnin}
+iterations are discarded. For example, if you specify 100 burn-in iterations
+and 1,000 retained iterations, a total of 1,100 total iterations will be
+completed, but results will be based only on the final 1,000 iterations.
+The optimal threshold is then calculated as the average of the threshold
+values from the retained iterations.
+
+Convergence of the iteration process is monitored using the \eqn{\hat{R}}
+statistic described by Vehtari et al. (2021). By default, the \eqn{\hat{R}}
+statistic is calculated for the optimal threshold values that are estimated
+at each iteration. Optionally, users may specify and \code{additional_criterion}
+to be monitored with the \eqn{\hat{R}}. For example, we could calculate the
+area under the ROC curve with the "true" values used at each iteration to
+monitor that value for convergence as well. A warning is produced if the
+threshold or, if specified, the \code{additional_criterion} do not meet the
+convergence criteria of an \eqn{\hat{R}} less than 1.01 recommended by
+Vehtari et al. (2021).
+
+Finally, the average threshold is applied to the samples of "true" values
+that were generated at each iteration to calculate performance metrics for
+each iteration (e.g., sensitivity, specificity). In addition, we can also
+specify additional thresholds to compare (\code{comp_thresholds}) that may be of
+interest (e.g., comparing our optimal threshold to the traditional threshold
+of 0.5). Thus, the final returned object includes each of the investigated
+thresholds (i.e., the optimal threshold and any specified in
+\code{comp_thresholds}) and the distribution of the performance metrics across all
+retained iterations for each of the thresholds. To change the metrics that
+are provided by default, specify new \code{metrics}.
 }
 \examples{
 est <- runif(100)
-optimal_iterate(estimates = est, weight_method = "distance",
+optimal_iterate(estimates = est, weighting_method = "distance",
                 optimal_method = "youden", iter_retain = 100)
+
+}
+\references{
+Vehtari, A., Gelman, A., Simpson, D., Carpenter, B., & Bürkner,
+P.-C. (2021). Rank-normalization, folding, and localization: An improved
+\eqn{\hat{R}} for assessing convergence of MCMC (with discussion).
+\emph{Bayesian Analysis, 16}(2), 667-718. \doi{10.1214/20-BA1221}
 }
 \seealso{
 Other threshold approximation methods: 

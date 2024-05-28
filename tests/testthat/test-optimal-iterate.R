@@ -1,6 +1,6 @@
 test_that("iteration works", {
   it_youden <- optimal_iterate(estimates = dcm_probs$att1$estimate,
-                               weight_method = "beta",
+                               weighting_method = "beta", precision = 10,
                                optimal_method = "youden")
 
   expect_equal(colnames(it_youden),
@@ -18,7 +18,7 @@ test_that("iteration works", {
 
 test_that("additional criteria works", {
   it_topleft <- optimal_iterate(estimates = dcm_probs$att1$estimate,
-                                weight_method = "beta",
+                                weighting_method = "beta",
                                 optimal_method = "topleft",
                                 iter_retain = 250,
                                 additional_criterion = "roc_auc")
@@ -42,7 +42,7 @@ test_that("additional criteria works", {
 test_that("metrics work", {
   it_topleft <- optimal_iterate(estimates = dcm_probs$att1$estimate,
                                 optimal_method = "topleft",
-                                weight_method = "distance",
+                                weighting_method = "distance",
                                 iter_retain = 100,
                                 metrics = yardstick::metric_set(
                                   yardstick::precision,
@@ -65,7 +65,7 @@ test_that("metrics work", {
 
   it_youden <- optimal_iterate(estimates = dcm_probs$att1$estimate,
                                optimal_method = "youden",
-                               weight_method = "distance",
+                               weighting_method = "distance",
                                additional_criterion = "gain_capture",
                                iter_retain = 250,
                                metrics = yardstick::metric_set(
@@ -89,7 +89,7 @@ test_that("metrics work", {
 test_that("comparison thresholds work", {
   it_youden <- optimal_iterate(estimates = dcm_probs$att1$estimate,
                                optimal_method = "topleft",
-                               weight_method = "distance",
+                               weighting_method = "distance",
                                additional_criterion = "pr_auc",
                                comp_thresholds = c(0.5, 0.8),
                                iter_retain = 200,

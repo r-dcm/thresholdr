@@ -4,8 +4,8 @@
 #' classifications are unknown.
 #'
 #' @inheritParams optimal_resample
-#' @param weight_method The method for generating classifications, weighted by
-#'   the current estimate of the optimal threshold. One of
+#' @param weighting_method The method for generating classifications, weighted
+#'   by the current estimate of the optimal threshold. One of
 #'   `r paste0("\"", weighting_method_choices(), "\"", collapse = ", ")`.
 #' @param ... Additional arguments passed to the corresponding weighting method.
 #' @param additional_criterion Optional. If provided, must be a class
@@ -15,7 +15,43 @@
 #' @param iter_retain The number of iterations to retain (see Details below).
 #'
 #' @details
-#' Additional details...
+#' To initialize the iteration process, a vector of "true" values is generated
+#' using [generate_truth()]. Then, the optimal threshold is calculated using the
+#' set of generated "true" values and the specified `optimal_method`. A new
+#' vector of "true" values is then generated, with classifications biased in the
+#' direction of the calculated optimal threshold using the method specified by
+#' `weighting_method`. That is, `estimates` will be less likely to result in a
+#' classification 1 if the threshold is .8 than if it is .5. Using the updated
+#' vector of "true" values, a new optimal threshold is calculated. This proceeds
+#' for the specified number of iterations. The total number of iterations is
+#' given by `iter_burnin + iter_retain`; however, the first `iter_burnin`
+#' iterations are discarded. For example, if you specify 100 burn-in iterations
+#' and 1,000 retained iterations, a total of 1,100 total iterations will be
+#' completed, but results will be based only on the final 1,000 iterations.
+#' The optimal threshold is then calculated as the average of the threshold
+#' values from the retained iterations.
+#'
+#' Convergence of the iteration process is monitored using the \eqn{\hat{R}}
+#' statistic described by Vehtari et al. (2021). By default, the \eqn{\hat{R}}
+#' statistic is calculated for the optimal threshold values that are estimated
+#' at each iteration. Optionally, users may specify and `additional_criterion`
+#' to be monitored with the \eqn{\hat{R}}. For example, we could calculate the
+#' area under the ROC curve with the "true" values used at each iteration to
+#' monitor that value for convergence as well. A warning is produced if the
+#' threshold or, if specified, the `additional_criterion` do not meet the
+#' convergence criteria of an \eqn{\hat{R}} less than 1.01 recommended by
+#' Vehtari et al. (2021).
+#'
+#' Finally, the average threshold is applied to the samples of "true" values
+#' that were generated at each iteration to calculate performance metrics for
+#' each iteration (e.g., sensitivity, specificity). In addition, we can also
+#' specify additional thresholds to compare (`comp_thresholds`) that may be of
+#' interest (e.g., comparing our optimal threshold to the traditional threshold
+#' of 0.5). Thus, the final returned object includes each of the investigated
+#' thresholds (i.e., the optimal threshold and any specified in
+#' `comp_thresholds`) and the distribution of the performance metrics across all
+#' retained iterations for each of the thresholds. To change the metrics that
+#' are provided by default, specify new `metrics`.
 #'
 #' @return A [tibble][tibble::tibble-package] with 1 row per threshold. The
 #' columns are:
@@ -31,15 +67,21 @@
 #'
 #' @examples
 #' est <- runif(100)
-#' optimal_iterate(estimates = est, weight_method = "distance",
+#' optimal_iterate(estimates = est, weighting_method = "distance",
 #'                 optimal_method = "youden", iter_retain = 100)
-optimal_iterate <- function(estimates, weight_method, optimal_method, ...,
+#'
+#' @references Vehtari, A., Gelman, A., Simpson, D., Carpenter, B., & Bürkner,
+#'   P.-C. (2021). Rank-normalization, folding, and localization: An improved
+#'   \eqn{\hat{R}} for assessing convergence of MCMC (with discussion).
+#'   *Bayesian Analysis, 16*(2), 667-718. \doi{10.1214/20-BA1221}
+optimal_iterate <- function(estimates, weighting_method, optimal_method, ...,
                             additional_criterion = NULL,
                             iter_burnin = 100, iter_retain = 1000,
                             comp_thresholds = NULL, metrics = NULL) {
   # check inputs -----
   estimates <- check_double(estimates, lb = 0, ub = 1)
-  weight_method <- rlang::arg_match(weight_method, weighting_method_choices())
+  weighting_method <- rlang::arg_match(weighting_method,
+                                       weighting_method_choices())
   optimal_method <- rlang::arg_match(optimal_method, optimal_method_choices())
   converge_function <- if (is.null(additional_criterion)) {
     additional_criterion <- "identity"
@@ -56,7 +98,7 @@ optimal_iterate <- function(estimates, weight_method, optimal_method, ...,
 
   # identify needed functions -----
   optimal_function <- get_optimal_function(optimal_method)
-  weight_function <- get_weighting_function(weight_method)
+  weight_function <- get_weighting_function(weighting_method)
 
   # initial state -----
   iter_truth <- generate_truth(estimates)
@@ -111,10 +153,7 @@ optimal_iterate <- function(estimates, weight_method, optimal_method, ...,
       chain_summary = purrr::map(
         .data$draws,
         \(x) {
-          posterior::summarize_draws(
-            x,
-            posterior::default_convergence_measures()
-          ) |>
+          posterior::summarize_draws(x, "rhat") |>
             dplyr::select(-"variable")
         }
       )
