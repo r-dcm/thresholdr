@@ -65,9 +65,9 @@ generate_beta_wt_truth <- function(estimates, threshold = 0.5, ...,
 
   beta_shapes <- muphi_to_shapes(mu = threshold, phi = precision)
 
-  as.integer(estimates > rbeta(n = length(estimates),
-                               shape1 = beta_shapes$shape1,
-                               shape2 = beta_shapes$shape2))
+  as.integer(estimates > stats::rbeta(n = length(estimates),
+                                      shape1 = beta_shapes$shape1,
+                                      shape2 = beta_shapes$shape2))
 }
 
 #' @author Jonathan A. Pedroza
