@@ -47,9 +47,9 @@ Youden, W. J. (1950). Index for rating diagnostic tests.
 \doi{10.1002/1097-0142(1950)3:1<32::AID-CNCR2820030106>3.0.CO;2-3}
 }
 \seealso{
-Other Optimal threshold methods: 
+Other optimal threshold methods: 
 \code{\link{calc_cz}()},
 \code{\link{calc_gmean}()},
 \code{\link{calc_topleft}()}
 }
-\concept{Optimal threshold methods}
+\concept{optimal threshold methods}

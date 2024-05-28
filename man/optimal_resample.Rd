@@ -22,8 +22,8 @@ optimal_resample(
 \item{samples}{The number of samples of generated true values to create.}
 
 \item{weight_by}{Optional. If provided, must be a class probability metric
-from \link[yardstick:yardstick-package]{yardstick} used to weight the optimal
-threshold from each resample when calculate the overall optimal threshold
+from \link[yardstick:yardstick-package]{yardstick}. Used to weight the optimal
+threshold from each resample when calculating the overall optimal threshold
 (see Details below). If \code{NULL} (the default), all resamples are weighted
 equally.}
 
@@ -43,7 +43,7 @@ probabilities. A set of default metrics is used when \code{NULL} (see
 A \link[tibble:tibble-package]{tibble} with 1 row per threshold. The
 columns are:
 \itemize{
-\item \code{threshold}: The averaged optimal threshold.
+\item \code{.threshold}: The averaged optimal threshold.
 \item If \code{weight_by} was specified, an \link[posterior:rvar]{rvar} containing the
 distribution of class probability metrics across all samples.
 \item A set of \link[posterior:rvar]{rvar} objects for each of the specified
@@ -60,10 +60,10 @@ For each sample requested, a new vector of "true" values is generated using
 \code{\link[=generate_truth]{generate_truth()}}. Then, the optimal threshold is calculated for each set of
 generated "true" values using the specified \code{optimal_method}.
 
-The final optimal threshold is then calculated the average of the thresholds
-that were estimated for each sample. If desired, a distance-weighted mean can
-be specified by supplying a class probability metric from the
-\link[yardstick:yardstick-package]{yardstick} (e.g., \code{\link[yardstick:roc_auc]{yardstick::roc_auc()}}).
+The final optimal threshold is then calculated as the average of the
+thresholds that were estimated for each sample. If desired, a distance-
+weighted mean can be specified by supplying a class probability metric from
+the \link[yardstick:yardstick-package]{yardstick} (e.g., \code{\link[yardstick:roc_auc]{yardstick::roc_auc()}}).
 When \code{weight_by} is specified, the chosen metric is computed for the
 provided \code{estimates} and each sample of generated "true" values. For example,
 we could calculate the area under the ROC curve (AUC) for each sample. The
@@ -86,3 +86,8 @@ thresholds. To change the metrics that are provided by default, specify new
 est <- runif(100)
 optimal_resample(estimates = est, optimal_method = "youden", samples = 200)
 }
+\seealso{
+Other threshold approximation methods: 
+\code{\link{optimal_iterate}()}
+}
+\concept{threshold approximation methods}

@@ -27,6 +27,7 @@ Authors:
 
 Other contributors:
 \itemize{
+  \item Andrew Heiss (shapes_to_muphi() and muphi_to_shapes()) [copyright holder]
   \item University of Kansas [copyright holder]
 }
 

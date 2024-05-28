@@ -1,5 +1,7 @@
+Bürkner
 CMD
 Codecov
+Gelman
 Kubat
 LCDM
 Lifecycle
@@ -8,6 +10,7 @@ Matwin
 ORCID
 Psychometrika
 Templin
+Vehtari
 Willse
 Youden
 Youden's
@@ -19,6 +22,12 @@ emip
 et
 gmean
 measr
+muphi
 optimality
+parametrize
 topleft
 youden
+α
+β
+μ
+φ

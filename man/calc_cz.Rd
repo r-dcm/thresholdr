@@ -48,9 +48,9 @@ Liu, X. (2012). Classification accuracy and cut point selection.
 \doi{10.1002/sim.4509}
 }
 \seealso{
-Other Optimal threshold methods: 
+Other optimal threshold methods: 
 \code{\link{calc_gmean}()},
 \code{\link{calc_topleft}()},
 \code{\link{calc_youden}()}
 }
-\concept{Optimal threshold methods}
+\concept{optimal threshold methods}
