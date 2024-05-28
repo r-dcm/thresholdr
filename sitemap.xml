@@ -22,6 +22,9 @@
     <loc>https:/thresholdr.measr.info/index.html</loc>
   </url>
   <url>
+    <loc>https:/thresholdr.measr.info/reference/beta-conversion.html</loc>
+  </url>
+  <url>
     <loc>https:/thresholdr.measr.info/reference/calc_cz.html</loc>
   </url>
   <url>
@@ -44,6 +47,9 @@
   </url>
   <url>
     <loc>https:/thresholdr.measr.info/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>https:/thresholdr.measr.info/reference/optimal_iterate.html</loc>
   </url>
   <url>
     <loc>https:/thresholdr.measr.info/reference/optimal_resample.html</loc>

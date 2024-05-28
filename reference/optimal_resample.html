@@ -78,8 +78,8 @@ when true classifications are unknown.</p>
 
 <dt>weight_by</dt>
 <dd><p>Optional. If provided, must be a class probability metric
-from <a href="https://yardstick.tidymodels.org/reference/yardstick-package.html" class="external-link">yardstick</a> used to weight the optimal
-threshold from each resample when calculate the overall optimal threshold
+from <a href="https://yardstick.tidymodels.org/reference/yardstick-package.html" class="external-link">yardstick</a>. Used to weight the optimal
+threshold from each resample when calculating the overall optimal threshold
 (see Details below). If <code>NULL</code> (the default), all resamples are weighted
 equally.</p></dd>
 
@@ -105,7 +105,7 @@ probabilities. A set of default metrics is used when <code>NULL</code> (see
     
 
 <p>A <a href="https://tibble.tidyverse.org/reference/tibble-package.html" class="external-link">tibble</a> with 1 row per threshold. The
-columns are:</p><ul><li><p><code>threshold</code>: The averaged optimal threshold.</p></li>
+columns are:</p><ul><li><p><code>.threshold</code>: The averaged optimal threshold.</p></li>
 <li><p>If <code>weight_by</code> was specified, an <a href="https://mc-stan.org/posterior/reference/rvar.html" class="external-link">rvar</a> containing the
 distribution of class probability metrics across all samples.</p></li>
 <li><p>A set of <a href="https://mc-stan.org/posterior/reference/rvar.html" class="external-link">rvar</a> objects for each of the specified
@@ -117,10 +117,10 @@ performance metrics, containing the distributions across all samples
     <p>For each sample requested, a new vector of "true" values is generated using
 <code><a href="generate_truth.html">generate_truth()</a></code>. Then, the optimal threshold is calculated for each set of
 generated "true" values using the specified <code>optimal_method</code>.</p>
-<p>The final optimal threshold is then calculated the average of the thresholds
-that were estimated for each sample. If desired, a distance-weighted mean can
-be specified by supplying a class probability metric from the
-<a href="https://yardstick.tidymodels.org/reference/yardstick-package.html" class="external-link">yardstick</a> (e.g., <code><a href="https://yardstick.tidymodels.org/reference/roc_auc.html" class="external-link">yardstick::roc_auc()</a></code>).
+<p>The final optimal threshold is then calculated as the average of the
+thresholds that were estimated for each sample. If desired, a distance-
+weighted mean can be specified by supplying a class probability metric from
+the <a href="https://yardstick.tidymodels.org/reference/yardstick-package.html" class="external-link">yardstick</a> (e.g., <code><a href="https://yardstick.tidymodels.org/reference/roc_auc.html" class="external-link">yardstick::roc_auc()</a></code>).
 When <code>weight_by</code> is specified, the chosen metric is computed for the
 provided <code>estimates</code> and each sample of generated "true" values. For example,
 we could calculate the area under the ROC curve (AUC) for each sample. The
@@ -138,15 +138,20 @@ distribution of performance metrics across all resamples for each of the
 thresholds. To change the metrics that are provided by default, specify new
 <code>metrics</code>.</p>
     </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p>Other threshold approximation methods: 
+<code><a href="optimal_iterate.html">optimal_iterate</a>()</code></p></div>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">est</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">optimal_resample</span><span class="op">(</span>estimates <span class="op">=</span> <span class="va">est</span>, optimal_method <span class="op">=</span> <span class="st">"youden"</span>, samples <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 4</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .threshold sensitivity   specificity       j_index</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;rvar[1d]&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;rvar[1d]&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;rvar[1d]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>      0.517  0.7 <span style="color: #949494;">± 0.04</span>  0.75 <span style="color: #949494;">± 0.045</span>  0.45 <span style="color: #949494;">± 0.078</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .threshold   sensitivity   specificity      j_index</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;rvar[1d]&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;rvar[1d]&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;rvar[1d]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>      0.541  0.76 <span style="color: #949494;">± 0.046</span>  0.76 <span style="color: #949494;">± 0.052</span>  0.53 <span style="color: #949494;">± 0.09</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
