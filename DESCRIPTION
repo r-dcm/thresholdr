@@ -5,6 +5,8 @@ Authors@R: c(
     person("W. Jake", "Thompson", , "wjakethompson@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-7339-0300")),
     person("Jonathan A.", "Pedroza", role = "aut"),
+    person("Andrew", "Heiss", role = "cph",
+           comment = "shapes_to_muphi() and muphi_to_shapes()"),
     person("University of Kansas", role = "cph")
   )
 Description: Diagnostic classification models are confirmatory latent class
