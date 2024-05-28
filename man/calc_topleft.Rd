@@ -41,6 +41,8 @@ calc_topleft(estimates = dcm_probs$att3$estimate,
 }
 \seealso{
 Other optimal threshold methods: 
+\code{\link{calc_cz}()},
+\code{\link{calc_gmean}()},
 \code{\link{calc_youden}()}
 }
 \concept{optimal threshold methods}

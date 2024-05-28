@@ -48,6 +48,8 @@ Youden, W. J. (1950). Index for rating diagnostic tests.
 }
 \seealso{
 Other optimal threshold methods: 
+\code{\link{calc_cz}()},
+\code{\link{calc_gmean}()},
 \code{\link{calc_topleft}()}
 }
 \concept{optimal threshold methods}
