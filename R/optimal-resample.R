@@ -8,8 +8,8 @@
 #'   `r paste0("\"", optimal_method_choices(), "\"", collapse = ", ")`.
 #' @param samples The number of samples of generated true values to create.
 #' @param weight_by Optional. If provided, must be a class probability metric
-#'   from [yardstick][yardstick::yardstick-package] used to weight the optimal
-#'   threshold from each resample when calculate the overall optimal threshold
+#'   from [yardstick][yardstick::yardstick-package]. Used to weight the optimal
+#'   threshold from each resample when calculating the overall optimal threshold
 #'   (see Details below). If `NULL` (the default), all resamples are weighted
 #'   equally.
 #' @param comp_thresholds Additional threshold values to evaluate against the
@@ -52,13 +52,14 @@
 #'
 #' @return A [tibble][tibble::tibble-package] with 1 row per threshold. The
 #' columns are:
-#'   * `threshold`: The averaged optimal threshold.
+#'   * `.threshold`: The averaged optimal threshold.
 #'   * If `weight_by` was specified, an [rvar][posterior::rvar()] containing the
 #'     distribution of class probability metrics across all samples.
 #'   * A set of [rvar][posterior::rvar()] objects for each of the specified
 #'     performance metrics, containing the distributions across all samples
 #'     (i.e., 1 column per specified metric).
 #' @export
+#' @family threshold approximation methods
 #'
 #' @examples
 #' est <- runif(100)
