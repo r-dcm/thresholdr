@@ -17,7 +17,7 @@
 #'
 #' @return A numeric scalar representing the optimal probability threshold.
 #' @export
-#' @family Optimal threshold methods
+#' @family optimal threshold methods
 #'
 #' @examples
 #' calc_youden(estimates = dcm_probs$att1$estimate,
@@ -68,7 +68,7 @@ calc_youden <- function(estimates, truth) {
 #'
 #' @return A numeric scalar representing the optimal probability threshold.
 #' @export
-#' @family Optimal threshold methods
+#' @family optimal threshold methods
 #'
 #' @examples
 #' calc_topleft(estimates = dcm_probs$att1$estimate,
