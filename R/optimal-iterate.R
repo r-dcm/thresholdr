@@ -202,11 +202,15 @@ optimal_iterate <- function(estimates, weighting_method, optimal_method, ...,
 
   # print diagnostics and return -----
   if (any(chain_diagnostics$rhat > 1.01)) {
+    attr(results, "converged") <- FALSE
+
     chain_diagnostics |>
       dplyr::filter(.data$rhat > 1.01) |>
       glue::glue_data("Statistic did not converge (Rhat > 1.01): ",
                       "{{.arg {paste(parameter)}}}") |>
       cli::cli_warn()
+  } else {
+    attr(results, "converged") <- TRUE
   }
 
   return(results)
