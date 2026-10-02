@@ -10,8 +10,15 @@
 #'
 #' @return An error message created by [cli::cli_abort()].
 #' @noRd
-abort_bad_argument <- function(arg, must, not = NULL, extra = NULL,
-                               custom = NULL, ..., call) {
+abort_bad_argument <- function(
+  arg,
+  must,
+  not = NULL,
+  extra = NULL,
+  custom = NULL,
+  ...,
+  call
+) {
   extra_arg <- list(...)
 
   msg <- glue::glue("`{arg}` must {must}")
@@ -29,109 +36,52 @@ abort_bad_argument <- function(arg, must, not = NULL, extra = NULL,
 }
 
 
-#' Check numeric (double) value
+#' Check vectors of numeric values
 #'
 #' @param x The input value to be checked.
-#' @param lb The acceptable lower bound.
-#' @param ub The acceptable upper bound.
-#' @param inclusive Logical. Are the `lb` and `ub` inclusive?
-#' @param allow_null Logical. Are `NULL` values allowed?
-#' @param allow_missing Logical. Are `NA` values allowed?
+#' @param ... Additional arguments passed to [rlang::check_number_decimal()] for
+#'   [check_double()] or [rlang::check_number_whole()] for [check_integer()].
 #' @param exp_length The expected value of `length(x)`. If `NULL`, any length is
 #'   accepted. If multiple lengths are acceptable, a vector can be specified
 #'   (e.g., `exp_length = c(1, 10)`).
-#' @param arg The name of the argument for the error message.
-#' @param call The call stack for the error message.
+#' @inheritParams rlang::check_number_decimal arg call
 #'
-#' @return If all requirements are met, `x` is returned. If requirements are not
-#'   met, an informative error message is returned by [abort_bad_argument()].
 #' @noRd
-check_double <- function(x, lb = -Inf, ub = Inf, inclusive = TRUE,
-                         allow_null = FALSE, allow_missing = FALSE,
-                         exp_length = NULL,
-                         arg = rlang::caller_arg(x),
-                         call = rlang::caller_env()) {
-  if (is.null(x) && allow_null) return(x)
-
-  dbl_bounds <- check_bounds(type = "dbl", inclusive = inclusive)
-  check_lb <- dbl_bounds$check_lb
-  check_ub <- dbl_bounds$check_ub
-
-  if (!is.numeric(x)) {
-    abort_bad_argument(arg = arg, must = "be of type numeric", not = typeof(x),
-                       call = call)
+check_double <- function(
+  x,
+  ...,
+  exp_length = NULL,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  for (i in seq_along(x)) {
+    rlang::check_number_decimal(x[i], ..., arg = arg, call = call)
   }
-
-  if (!allow_missing && any(is.na(x))) {
-    abort_bad_argument(arg = arg, must = "be non-missing", call = call)
+  if (!length(x)) {
+    rlang::check_number_decimal(x, ..., arg = arg, call = call)
   }
 
   check_length(x = x, exp_length = exp_length, arg = arg, call = call)
-
-  if (any(vapply(x, check_lb, logical(1), lb)) ||
-        any(vapply(x, check_ub, logical(1), ub))) {
-    msg <- bounded_error(lb, ub)
-    abort_bad_argument(arg = arg, must = msg, call = call)
-  }
-
-  x
 }
 
 
-#' Check integer value
-#'
-#' @param x The input value to be checked.
-#' @param lb The acceptable lower bound.
-#' @param ub The acceptable upper bound.
-#' @param inclusive Logical. Are the `lb` and `ub` inclusive?
-#' @param allow_null Logical. Are `NULL` values allowed?
-#' @param allow_missing Logical. Are `NA` values allowed?
-#' @param exp_length The expected value of `length(x)`. If `NULL`, any length is
-#'   accepted. If multiple lengths are acceptable, a vector can be specified
-#'   (e.g., `exp_length = c(1, 10)`).
-#' @param arg The name of the argument for the error message.
-#' @param call The call stack for the error message.
-#'
-#' @return If all requirements are met, `x` is returned. If `x` was supplied as
-#'   a double, it is coerced to an integer before being returned. If
-#'   requirements are not met, an informative error message is returned by
-#'   [abort_bad_argument()].
+#' @rdname check_double
 #' @noRd
-check_integer <- function(x, lb = -Inf, ub = Inf, inclusive = TRUE,
-                          allow_null = FALSE, allow_missing = FALSE,
-                          exp_length = NULL,
-                          arg = rlang::caller_arg(x),
-                          call = rlang::caller_env()) {
-  if (is.null(x) && allow_null) return(x)
-
-  int_bounds <- check_bounds(type = "int", inclusive = inclusive,
-                             lb = lb, ub = ub)
-  check_lb <- int_bounds$check_lb
-  check_ub <- int_bounds$check_ub
-
-  if (!is.numeric(x)) {
-    abort_bad_argument(arg = arg, must = "be of type numeric", not = typeof(x),
-                       call = call)
+check_integer <- function(
+  x,
+  ...,
+  exp_length = NULL,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  for (i in seq_along(x)) {
+    rlang::check_number_whole(x[i], ..., arg = arg, call = call)
   }
-  x_int <- as.integer(x)
-
-  if (!allow_missing && any(is.na(x_int))) {
-    abort_bad_argument(arg = arg, must = "be non-missing", call = call)
+  if (!length(x)) {
+    rlang::check_number_whole(x, ..., arg = arg, call = call)
   }
 
-  check_length(x = x_int, exp_length = exp_length, arg = arg, call = call)
-
-  if (any(x != x_int)) {
-    msg <- "be{cli::qty(length(extra_arg$x_int))}{? an/} integer value{?/s}"
-    abort_bad_argument(arg = arg, must = msg, x_int = x_int, call = call)
-  }
-
-  if (any(x_int < check_lb) || any(x_int > check_ub)) {
-    msg <- msg <- bounded_error(lb, ub)
-    abort_bad_argument(arg = arg, must = msg, call = call)
-  }
-
-  x_int
+  check_length(x = x, exp_length = exp_length, arg = arg, call = call)
 }
 
 
@@ -146,15 +96,21 @@ check_integer <- function(x, lb = -Inf, ub = Inf, inclusive = TRUE,
 #'   function is returned. Otherwise, an error message is returned with
 #'   [cli::cli_abort()].
 #' @noRd
-check_prob_metric <- function(x,
-                              arg = rlang::caller_arg(x),
-                              call = rlang::caller_env()) {
-  metric_url <- paste0("https://yardstick.tidymodels.org/reference/",
-                       "index.html#class-probability-metrics")
-  msg <- paste0("{.arg {arg}} must be a probability metric from ",
-                "{.pkg yardstick}. ",
-                "For all options see the ",
-                "{.href [reference list]({metric_url})}.")
+check_prob_metric <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  metric_url <- paste0(
+    "https://yardstick.tidymodels.org/reference/",
+    "index.html#class-probability-metrics"
+  )
+  msg <- paste0(
+    "{.arg {arg}} must be a probability metric from ",
+    "{.pkg yardstick}. ",
+    "For all options see the ",
+    "{.href [reference list]({metric_url})}."
+  )
 
   if (!(x %in% getNamespaceExports("yardstick"))) {
     cli::cli_abort(msg, call = call)

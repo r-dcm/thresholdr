@@ -86,7 +86,7 @@ optimal_iterate <- function(
   metrics = NULL
 ) {
   # check inputs -----
-  estimates <- check_double(estimates, min = 0, max = 1)
+  check_double(estimates, min = 0, max = 1)
   weighting_method <- rlang::arg_match(
     weighting_method,
     weighting_method_choices()
@@ -98,24 +98,9 @@ optimal_iterate <- function(
   } else {
     check_prob_metric(additional_criterion)
   }
-  iter_burnin <- check_integer(
-    iter_burnin,
-    lb = 0,
-    inclusive = FALSE,
-    exp_length = 1
-  )
-  iter_retain <- check_integer(
-    iter_retain,
-    lb = 0,
-    inclusive = FALSE,
-    exp_length = 1
-  )
-  comp_thresholds <- check_double(
-    comp_thresholds,
-    lb = 0,
-    ub = 1,
-    allow_null = TRUE
-  )
+  check_integer(iter_burnin, min = 1, exp_length = 1)
+  check_integer(iter_retain, min = 1, exp_length = 1)
+  check_double(comp_thresholds, min = 0, max = 1, allow_null = TRUE)
 
   # identify needed functions -----
   optimal_function <- get_optimal_function(optimal_method)

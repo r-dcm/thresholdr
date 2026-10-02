@@ -15,13 +15,8 @@
 #' create_roc(estimates = dcm_probs$att1$estimate, truth = dcm_probs$att1$truth)
 create_roc <- function(estimates, truth) {
   # input checks -----
-  estimates <- check_double(estimates, lb = 0, ub = 1)
-  truth <- check_integer(
-    truth,
-    lb = 0L,
-    ub = 1L,
-    exp_length = length(estimates)
-  )
+  check_double(estimates, min = 0, max = 1)
+  check_integer(truth, min = 0, max = 1, exp_length = length(estimates))
 
   # create data -----
   roc_dat <- estimate_tibble(estimates, truth)

@@ -73,21 +73,16 @@ optimal_resample <- function(
   metrics = NULL
 ) {
   # check inputs -----
-  estimates <- check_double(estimates, lb = 0, ub = 1)
+  check_double(estimates, min = 0, max = 1)
   optimal_method <- rlang::arg_match(optimal_method, optimal_method_choices())
-  samples <- check_integer(samples, lb = 0, inclusive = FALSE, exp_length = 1)
+  samples <- check_integer(samples, min = 1, exp_length = 1)
   weight_function <- if (is.null(weight_by)) {
     weight_by <- "identity"
     \(data, truth, ...) tibble::tibble(.estimate = 1)
   } else {
     check_prob_metric(weight_by)
   }
-  comp_thresholds <- check_double(
-    comp_thresholds,
-    lb = 0,
-    ub = 1,
-    allow_null = TRUE
-  )
+  check_double(comp_thresholds, min = 0, max = 1, allow_null = TRUE)
 
   # identify needed functions -----
   optimal_function <- get_optimal_function(optimal_method)

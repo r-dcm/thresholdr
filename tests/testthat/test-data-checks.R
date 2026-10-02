@@ -53,12 +53,12 @@ test_that("check_double", {
   num <- "1989"
   err <- rlang::catch_cnd(check_double(num))
   expect_s3_class(err, "rlang_error")
-  expect_match(err$message, "`num` must be of type numeric; not character")
+  expect_match(err$message, "`num` must be a number")
 
   taylor <- as.POSIXlt("1989-12-13")
   err <- rlang::catch_cnd(check_double(taylor))
   expect_s3_class(err, "rlang_error")
-  expect_match(err$message, "`taylor` must be of type numeric; not list")
+  expect_match(err$message, "`taylor` must be a number")
 
   err <- rlang::catch_cnd(check_double(c(c(1, 2), 3), exp_length = 1))
   expect_s3_class(err, "rlang_error")
@@ -70,23 +70,23 @@ test_that("check_double", {
 
   err <- rlang::catch_cnd(check_double(NA_real_))
   expect_s3_class(err, "rlang_error")
-  expect_match(err$message, "non-missing")
+  expect_match(err$message, "must be a number")
 
-  err <- rlang::catch_cnd(check_double(-1, lb = 0L))
+  err <- rlang::catch_cnd(check_double(NULL))
   expect_s3_class(err, "rlang_error")
-  expect_match(err$message, "greater than 0")
+  expect_match(err$message, "must be a number, not `NULL`")
 
-  err <- rlang::catch_cnd(check_double(1, ub = 0L))
+  err <- rlang::catch_cnd(check_double(-1, min = 0))
   expect_s3_class(err, "rlang_error")
-  expect_match(err$message, "less than 0")
+  expect_match(err$message, "larger than or equal to 0")
 
-  err <- rlang::catch_cnd(check_double(4L, lb = 0L, ub = 3L))
+  err <- rlang::catch_cnd(check_double(1, max = 0))
+  expect_s3_class(err, "rlang_error")
+  expect_match(err$message, "smaller than or equal to 0")
+
+  err <- rlang::catch_cnd(check_double(4L, min = 0, max = 3))
   expect_s3_class(err, "rlang_error")
   expect_match(err$message, "between 0 and 3")
-
-  err <- rlang::catch_cnd(check_double(0, lb = 0, inclusive = FALSE))
-  expect_s3_class(err, "rlang_error")
-  expect_match(err$message, "greater than 0")
 
   expect_equal(check_double(0.98), 0.98)
   expect_equal(check_double(0.1), 0.1)
@@ -100,12 +100,12 @@ test_that("check_integer", {
   num <- "a"
   err <- rlang::catch_cnd(check_integer(num))
   expect_s3_class(err, "rlang_error")
-  expect_match(err$message, "`num` must be of type numeric; not character")
+  expect_match(err$message, "`num` must be a whole number")
 
   taylor <- "swift"
   err <- rlang::catch_cnd(check_integer(taylor))
   expect_s3_class(err, "rlang_error")
-  expect_match(err$message, "`taylor` must be of type numeric; not character")
+  expect_match(err$message, "`taylor` must be a whole number")
 
   err <- rlang::catch_cnd(check_integer(1:2, exp_length = 1))
   expect_s3_class(err, "rlang_error")
@@ -118,35 +118,31 @@ test_that("check_integer", {
 
   err <- rlang::catch_cnd(check_integer(NA_integer_))
   expect_s3_class(err, "rlang_error")
-  expect_match(err$message, "non-missing")
+  expect_match(err$message, "must be a whole number")
 
   err <- rlang::catch_cnd(check_integer(NULL))
   expect_s3_class(err, "rlang_error")
-  expect_match(err$message, "numeric; not NULL")
+  expect_match(err$message, "must be a whole number, not `NULL`")
 
   err <- rlang::catch_cnd(check_integer(c(1, 2, 3.2)))
   expect_s3_class(err, "rlang_error")
-  expect_match(err$message, "be integer values")
+  expect_match(err$message, "must be a whole number")
 
   err <- rlang::catch_cnd(check_integer(19.89))
   expect_s3_class(err, "rlang_error")
-  expect_match(err$message, "be an integer value")
+  expect_match(err$message, "must be a whole number")
 
-  err <- rlang::catch_cnd(check_integer(-1, lb = 0L))
+  err <- rlang::catch_cnd(check_integer(-1, min = 0))
   expect_s3_class(err, "rlang_error")
-  expect_match(err$message, "greater than 0")
+  expect_match(err$message, "larger than or equal to 0")
 
-  err <- rlang::catch_cnd(check_integer(1, ub = 0L))
+  err <- rlang::catch_cnd(check_integer(1, max = 0))
   expect_s3_class(err, "rlang_error")
-  expect_match(err$message, "less than 0")
+  expect_match(err$message, "smaller than or equal to 0")
 
-  err <- rlang::catch_cnd(check_integer(4L, lb = 0L, ub = 3L))
+  err <- rlang::catch_cnd(check_integer(4L, min = 0, max = 3))
   expect_s3_class(err, "rlang_error")
   expect_match(err$message, "between 0 and 3")
-
-  err <- rlang::catch_cnd(check_integer(0, lb = 0, inclusive = FALSE))
-  expect_s3_class(err, "rlang_error")
-  expect_match(err$message, "greater than 0")
 
   expect_equal(check_integer(5), 5L)
   expect_equal(check_integer(5L), 5L)
