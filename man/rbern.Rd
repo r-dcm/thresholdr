@@ -27,5 +27,5 @@ rbern(n = 10, prob = 0.5)
 }
 \seealso{
 \link[stats:Distributions]{Distributions} for other standard
-distributions, including \link[stats:Binomial]{dbinom} for the binomial.
+distributions, including \link[stats:dbinom]{dbinom} for the binomial.
 }

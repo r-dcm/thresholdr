@@ -43,7 +43,7 @@ thresholds are included in the performance evaluation.}
 
 \item{metrics}{Either \code{NULL} or a \code{\link[yardstick:metric_set]{yardstick::metric_set()}} with a list of
 performance metrics to calculate. The metrics should all be oriented
-towards hard class predictions (e.g., \code{\link[yardstick:sens]{yardstick::sensitivity()}},
+towards hard class predictions (e.g., \code{\link[yardstick:sensitivity]{yardstick::sensitivity()}},
 \code{\link[yardstick:accuracy]{yardstick::accuracy()}}, \code{\link[yardstick:recall]{yardstick::recall()}}) and not class
 probabilities. A set of default metrics is used when \code{NULL} (see
 \code{\link[probably:threshold_perf]{probably::threshold_perf()}} for details).}
@@ -117,7 +117,7 @@ P.-C. (2021). Rank-normalization, folding, and localization: An improved
 \emph{Bayesian Analysis, 16}(2), 667-718. \doi{10.1214/20-BA1221}
 }
 \seealso{
-Other threshold approximation methods: 
-\code{\link{optimal_resample}()}
+Other threshold approximation methods:
+\code{\link[=optimal_resample]{optimal_resample()}}
 }
 \concept{threshold approximation methods}

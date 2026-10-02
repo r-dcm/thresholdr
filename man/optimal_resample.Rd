@@ -34,7 +34,7 @@ thresholds are included in the performance evaluation.}
 
 \item{metrics}{Either \code{NULL} or a \code{\link[yardstick:metric_set]{yardstick::metric_set()}} with a list of
 performance metrics to calculate. The metrics should all be oriented
-towards hard class predictions (e.g., \code{\link[yardstick:sens]{yardstick::sensitivity()}},
+towards hard class predictions (e.g., \code{\link[yardstick:sensitivity]{yardstick::sensitivity()}},
 \code{\link[yardstick:accuracy]{yardstick::accuracy()}}, \code{\link[yardstick:recall]{yardstick::recall()}}) and not class
 probabilities. A set of default metrics is used when \code{NULL} (see
 \code{\link[probably:threshold_perf]{probably::threshold_perf()}} for details).}
@@ -87,7 +87,7 @@ est <- runif(100)
 optimal_resample(estimates = est, optimal_method = "youden", samples = 200)
 }
 \seealso{
-Other threshold approximation methods: 
-\code{\link{optimal_iterate}()}
+Other threshold approximation methods:
+\code{\link[=optimal_iterate]{optimal_iterate()}}
 }
 \concept{threshold approximation methods}

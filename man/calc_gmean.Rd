@@ -46,9 +46,9 @@ of imbalanced training sets: One-sided selection} [Paper presentation].
 International Conference on Machine Learning, Nashville, TN.
 }
 \seealso{
-Other optimal threshold methods: 
-\code{\link{calc_cz}()},
-\code{\link{calc_topleft}()},
-\code{\link{calc_youden}()}
+Other optimal threshold methods:
+\code{\link[=calc_cz]{calc_cz()}},
+\code{\link[=calc_topleft]{calc_topleft()}},
+\code{\link[=calc_youden]{calc_youden()}}
 }
 \concept{optimal threshold methods}
