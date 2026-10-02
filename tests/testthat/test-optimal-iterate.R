@@ -8,17 +8,19 @@ test_that("iteration works", {
 
   expect_equal(
     colnames(it_youden),
-    c(".threshold", "sensitivity", "specificity", "j_index")
+    c(".threshold", "sensitivity", "specificity", "j_index", "distance")
   )
   expect_equal(typeof(it_youden$.threshold), "double")
   expect_s3_class(it_youden$sensitivity, "rvar")
   expect_s3_class(it_youden$specificity, "rvar")
   expect_s3_class(it_youden$j_index, "rvar")
+  expect_s3_class(it_youden$distance, "rvar")
 
   expect_equal(length(it_youden$.threshold), 1L)
   expect_equal(posterior::ndraws(it_youden$sensitivity), 1000L)
   expect_equal(posterior::ndraws(it_youden$specificity), 1000L)
   expect_equal(posterior::ndraws(it_youden$j_index), 1000L)
+  expect_equal(posterior::ndraws(it_youden$distance), 1000L)
 })
 
 test_that("additional criteria works", {
@@ -32,19 +34,28 @@ test_that("additional criteria works", {
 
   expect_equal(
     colnames(it_topleft),
-    c(".threshold", "roc_auc", "sensitivity", "specificity", "j_index")
+    c(
+      ".threshold",
+      "roc_auc",
+      "sensitivity",
+      "specificity",
+      "j_index",
+      "distance"
+    )
   )
   expect_equal(typeof(it_topleft$.threshold), "double")
   expect_s3_class(it_topleft$roc_auc, "rvar")
   expect_s3_class(it_topleft$sensitivity, "rvar")
   expect_s3_class(it_topleft$specificity, "rvar")
   expect_s3_class(it_topleft$j_index, "rvar")
+  expect_s3_class(it_topleft$distance, "rvar")
 
   expect_equal(length(it_topleft$.threshold), 1L)
   expect_equal(posterior::ndraws(it_topleft$roc_auc), 250L)
   expect_equal(posterior::ndraws(it_topleft$sensitivity), 250L)
   expect_equal(posterior::ndraws(it_topleft$specificity), 250L)
   expect_equal(posterior::ndraws(it_topleft$j_index), 250L)
+  expect_equal(posterior::ndraws(it_topleft$distance), 250L)
 })
 
 test_that("metrics work", {
@@ -118,14 +129,13 @@ test_that("comparison thresholds work", {
 
   expect_equal(
     colnames(it_youden),
-    c(".threshold", "pr_auc", "sens", "spec", "ppv", "distance")
+    c(".threshold", "pr_auc", "sens", "spec", "ppv")
   )
   expect_equal(typeof(it_youden$.threshold), "double")
   expect_s3_class(it_youden$pr_auc, "rvar")
   expect_s3_class(it_youden$sens, "rvar")
   expect_s3_class(it_youden$spec, "rvar")
   expect_s3_class(it_youden$ppv, "rvar")
-  expect_s3_class(it_youden$distance, "rvar")
 
   expect_equal(length(it_youden$.threshold), 3L)
   expect_equal(
@@ -171,18 +181,6 @@ test_that("comparison thresholds work", {
   expect_equal(
     vapply(
       it_youden$ppv,
-      \(x) posterior::E(posterior::rvar_is_na(x)),
-      double(1)
-    ),
-    c(0, 0, 0)
-  )
-  expect_equal(
-    vapply(it_youden$distance, posterior::ndraws, integer(1)),
-    c(200L, 200L, 200L)
-  )
-  expect_equal(
-    vapply(
-      it_youden$distance,
       \(x) posterior::E(posterior::rvar_is_na(x)),
       double(1)
     ),
