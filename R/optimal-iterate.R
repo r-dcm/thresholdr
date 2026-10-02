@@ -74,14 +74,23 @@
 #'   P.-C. (2021). Rank-normalization, folding, and localization: An improved
 #'   \eqn{\hat{R}} for assessing convergence of MCMC (with discussion).
 #'   *Bayesian Analysis, 16*(2), 667-718. \doi{10.1214/20-BA1221}
-optimal_iterate <- function(estimates, weighting_method, optimal_method, ...,
-                            additional_criterion = NULL,
-                            iter_burnin = 100, iter_retain = 1000,
-                            comp_thresholds = NULL, metrics = NULL) {
+optimal_iterate <- function(
+  estimates,
+  weighting_method,
+  optimal_method,
+  ...,
+  additional_criterion = NULL,
+  iter_burnin = 100,
+  iter_retain = 1000,
+  comp_thresholds = NULL,
+  metrics = NULL
+) {
   # check inputs -----
-  estimates <- check_double(estimates, lb = 0, ub = 1)
-  weighting_method <- rlang::arg_match(weighting_method,
-                                       weighting_method_choices())
+  estimates <- check_double(estimates, min = 0, max = 1)
+  weighting_method <- rlang::arg_match(
+    weighting_method,
+    weighting_method_choices()
+  )
   optimal_method <- rlang::arg_match(optimal_method, optimal_method_choices())
   converge_function <- if (is.null(additional_criterion)) {
     additional_criterion <- "identity"
@@ -89,12 +98,24 @@ optimal_iterate <- function(estimates, weighting_method, optimal_method, ...,
   } else {
     check_prob_metric(additional_criterion)
   }
-  iter_burnin <- check_integer(iter_burnin, lb = 0, inclusive = FALSE,
-                               exp_length = 1)
-  iter_retain <- check_integer(iter_retain, lb = 0, inclusive = FALSE,
-                               exp_length = 1)
-  comp_thresholds <- check_double(comp_thresholds, lb = 0, ub = 1,
-                                  allow_null = TRUE)
+  iter_burnin <- check_integer(
+    iter_burnin,
+    lb = 0,
+    inclusive = FALSE,
+    exp_length = 1
+  )
+  iter_retain <- check_integer(
+    iter_retain,
+    lb = 0,
+    inclusive = FALSE,
+    exp_length = 1
+  )
+  comp_thresholds <- check_double(
+    comp_thresholds,
+    lb = 0,
+    ub = 1,
+    allow_null = TRUE
+  )
 
   # identify needed functions -----
   optimal_function <- get_optimal_function(optimal_method)
@@ -103,19 +124,27 @@ optimal_iterate <- function(estimates, weighting_method, optimal_method, ...,
   # initial state -----
   iter_truth <- generate_truth(estimates)
   iter_threshold <- optimal_function(estimates = estimates, truth = iter_truth)
-  iter_conv <- converge_function(estimate_tibble(estimates, iter_truth),
-                                 truth = "truth", "estimate",
-                                 event_level = "second") |>
+  iter_conv <- converge_function(
+    estimate_tibble(estimates, iter_truth),
+    truth = "truth",
+    "estimate",
+    event_level = "second"
+  ) |>
     dplyr::pull(".estimate")
 
   # burn-in iterations -----
   for (i in seq_len(iter_burnin)) {
     iter_truth <- weight_function(estimates, threshold = iter_threshold, ...)
-    iter_threshold <- optimal_function(estimates = estimates,
-                                       truth = iter_truth)
-    iter_conv <- converge_function(estimate_tibble(estimates, iter_truth),
-                                   truth = "truth", "estimate",
-                                   event_level = "second") |>
+    iter_threshold <- optimal_function(
+      estimates = estimates,
+      truth = iter_truth
+    )
+    iter_conv <- converge_function(
+      estimate_tibble(estimates, iter_truth),
+      truth = "truth",
+      "estimate",
+      event_level = "second"
+    ) |>
       dplyr::pull(".estimate")
   }
 
@@ -125,11 +154,16 @@ optimal_iterate <- function(estimates, weighting_method, optimal_method, ...,
   cnv <- vector(mode = "double", length = iter_retain)
   for (i in seq_len(iter_retain)) {
     iter_truth <- weight_function(estimates, threshold = iter_threshold, ...)
-    iter_threshold <- optimal_function(estimates = estimates,
-                                       truth = iter_truth)
-    iter_conv <- converge_function(estimate_tibble(estimates, iter_truth),
-                                   truth = "truth", "estimate",
-                                   event_level = "second") |>
+    iter_threshold <- optimal_function(
+      estimates = estimates,
+      truth = iter_truth
+    )
+    iter_conv <- converge_function(
+      estimate_tibble(estimates, iter_truth),
+      truth = "truth",
+      "estimate",
+      event_level = "second"
+    ) |>
       dplyr::pull(".estimate")
 
     dat[[i]] <- estimate_tibble(estimates, iter_truth)
@@ -139,15 +173,17 @@ optimal_iterate <- function(estimates, weighting_method, optimal_method, ...,
 
   # check for convergence -----
   chain <- tibble::tibble(iteration = seq_len(iter_retain), dat = dat) |>
-    dplyr::mutate(threshold = thr, conv = cnv,
-                  mean_thr = mean(.data$threshold))
+    dplyr::mutate(threshold = thr, conv = cnv, mean_thr = mean(.data$threshold))
 
   chain_diagnostics <- chain |>
     dplyr::select("threshold", "conv") |>
     dplyr::summarize(dplyr::across(dplyr::everything(), posterior::rvar)) |>
     dplyr::rename(!!additional_criterion := "conv") |>
-    tidyr::pivot_longer(cols = dplyr::everything(),
-                        names_to = "parameter", values_to = "draws") |>
+    tidyr::pivot_longer(
+      cols = dplyr::everything(),
+      names_to = "parameter",
+      values_to = "draws"
+    ) |>
     dplyr::filter(.data$parameter != "identity") |>
     dplyr::mutate(
       chain_summary = purrr::map(
@@ -164,7 +200,8 @@ optimal_iterate <- function(estimates, weighting_method, optimal_method, ...,
   results <- chain |>
     dplyr::mutate(
       results = purrr::map2(
-        .data$dat, .data$mean_thr,
+        .data$dat,
+        .data$mean_thr,
         \(x, y, comp, metrics) {
           probably::threshold_perf(
             x,
@@ -175,10 +212,13 @@ optimal_iterate <- function(estimates, weighting_method, optimal_method, ...,
             metrics = metrics
           ) |>
             dplyr::select(".threshold", ".metric", ".estimate") |>
-            tidyr::pivot_wider(names_from = ".metric",
-                               values_from = ".estimate")
+            tidyr::pivot_wider(
+              names_from = ".metric",
+              values_from = ".estimate"
+            )
         },
-        comp = comp_thresholds, metrics = metrics
+        comp = comp_thresholds,
+        metrics = metrics
       )
     ) |>
 
@@ -192,12 +232,17 @@ optimal_iterate <- function(estimates, weighting_method, optimal_method, ...,
       )
     ) |>
     dplyr::rename(!!additional_criterion := "conv") |>
-    dplyr::select("iteration", !!additional_criterion,
-                  ".threshold":dplyr::last_col(),
-                  -dplyr::any_of("identity")) |>
-    dplyr::summarize(dplyr::across(dplyr::where(is.double), posterior::rvar),
-                     .threshold = posterior::E(.data$.threshold),
-                     .by = ".threshold") |>
+    dplyr::select(
+      "iteration",
+      !!additional_criterion,
+      ".threshold":dplyr::last_col(),
+      -dplyr::any_of("identity")
+    ) |>
+    dplyr::summarize(
+      dplyr::across(dplyr::where(is.double), posterior::rvar),
+      .threshold = posterior::E(.data$.threshold),
+      .by = ".threshold"
+    ) |>
     dplyr::relocate(".threshold", .before = 1)
 
   # print diagnostics and return -----
@@ -206,8 +251,10 @@ optimal_iterate <- function(estimates, weighting_method, optimal_method, ...,
 
     chain_diagnostics |>
       dplyr::filter(.data$rhat > 1.01) |>
-      glue::glue_data("Statistic did not converge (Rhat > 1.01): ",
-                      "{{.arg {paste(parameter)}}}") |>
+      glue::glue_data(
+        "Statistic did not converge (Rhat > 1.01): ",
+        "{{.arg {paste(parameter)}}}"
+      ) |>
       cli::cli_warn()
   } else {
     attr(results, "converged") <- TRUE

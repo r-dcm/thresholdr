@@ -1,10 +1,15 @@
 test_that("iteration works", {
-  it_youden <- optimal_iterate(estimates = dcm_probs$att1$estimate,
-                               weighting_method = "beta", precision = 10,
-                               optimal_method = "youden")
+  it_youden <- optimal_iterate(
+    estimates = dcm_probs$att1$estimate,
+    weighting_method = "beta",
+    precision = 10,
+    optimal_method = "youden"
+  )
 
-  expect_equal(colnames(it_youden),
-               c(".threshold", "sensitivity", "specificity", "j_index"))
+  expect_equal(
+    colnames(it_youden),
+    c(".threshold", "sensitivity", "specificity", "j_index")
+  )
   expect_equal(typeof(it_youden$.threshold), "double")
   expect_s3_class(it_youden$sensitivity, "rvar")
   expect_s3_class(it_youden$specificity, "rvar")
@@ -17,15 +22,18 @@ test_that("iteration works", {
 })
 
 test_that("additional criteria works", {
-  it_topleft <- optimal_iterate(estimates = dcm_probs$att1$estimate,
-                                weighting_method = "beta",
-                                optimal_method = "topleft",
-                                iter_retain = 250,
-                                additional_criterion = "roc_auc")
+  it_topleft <- optimal_iterate(
+    estimates = dcm_probs$att1$estimate,
+    weighting_method = "beta",
+    optimal_method = "topleft",
+    iter_retain = 250,
+    additional_criterion = "roc_auc"
+  )
 
-  expect_equal(colnames(it_topleft),
-               c(".threshold", "roc_auc", "sensitivity", "specificity",
-                 "j_index"))
+  expect_equal(
+    colnames(it_topleft),
+    c(".threshold", "roc_auc", "sensitivity", "specificity", "j_index")
+  )
   expect_equal(typeof(it_topleft$.threshold), "double")
   expect_s3_class(it_topleft$roc_auc, "rvar")
   expect_s3_class(it_topleft$sensitivity, "rvar")
@@ -40,18 +48,22 @@ test_that("additional criteria works", {
 })
 
 test_that("metrics work", {
-  it_topleft <- optimal_iterate(estimates = dcm_probs$att1$estimate,
-                                optimal_method = "topleft",
-                                weighting_method = "distance",
-                                iter_retain = 100,
-                                metrics = yardstick::metric_set(
-                                  yardstick::precision,
-                                  yardstick::f_meas,
-                                  yardstick::kap
-                                ))
+  it_topleft <- optimal_iterate(
+    estimates = dcm_probs$att1$estimate,
+    optimal_method = "topleft",
+    weighting_method = "distance",
+    iter_retain = 100,
+    metrics = yardstick::metric_set(
+      yardstick::precision,
+      yardstick::f_meas,
+      yardstick::kap
+    )
+  )
 
-  expect_equal(colnames(it_topleft),
-               c(".threshold", "precision", "f_meas", "kap"))
+  expect_equal(
+    colnames(it_topleft),
+    c(".threshold", "precision", "f_meas", "kap")
+  )
   expect_equal(typeof(it_topleft$.threshold), "double")
   expect_s3_class(it_topleft$precision, "rvar")
   expect_s3_class(it_topleft$f_meas, "rvar")
@@ -62,19 +74,22 @@ test_that("metrics work", {
   expect_equal(posterior::ndraws(it_topleft$f_meas), 100L)
   expect_equal(posterior::ndraws(it_topleft$kap), 100L)
 
+  it_youden <- optimal_iterate(
+    estimates = dcm_probs$att1$estimate,
+    optimal_method = "youden",
+    weighting_method = "distance",
+    additional_criterion = "gain_capture",
+    iter_retain = 250,
+    metrics = yardstick::metric_set(
+      yardstick::recall,
+      yardstick::ppv
+    )
+  )
 
-  it_youden <- optimal_iterate(estimates = dcm_probs$att1$estimate,
-                               optimal_method = "youden",
-                               weighting_method = "distance",
-                               additional_criterion = "gain_capture",
-                               iter_retain = 250,
-                               metrics = yardstick::metric_set(
-                                 yardstick::recall,
-                                 yardstick::ppv
-                               ))
-
-  expect_equal(colnames(it_youden),
-               c(".threshold", "gain_capture", "recall", "ppv"))
+  expect_equal(
+    colnames(it_youden),
+    c(".threshold", "gain_capture", "recall", "ppv")
+  )
   expect_equal(typeof(it_youden$.threshold), "double")
   expect_s3_class(it_youden$gain_capture, "rvar")
   expect_s3_class(it_youden$recall, "rvar")
@@ -87,20 +102,24 @@ test_that("metrics work", {
 })
 
 test_that("comparison thresholds work", {
-  it_youden <- optimal_iterate(estimates = dcm_probs$att1$estimate,
-                               optimal_method = "topleft",
-                               weighting_method = "distance",
-                               additional_criterion = "pr_auc",
-                               comp_thresholds = c(0.5, 0.8),
-                               iter_retain = 200,
-                               metrics = yardstick::metric_set(
-                                 yardstick::sens,
-                                 yardstick::spec,
-                                 yardstick::ppv
-                               ))
+  it_youden <- optimal_iterate(
+    estimates = dcm_probs$att1$estimate,
+    optimal_method = "topleft",
+    weighting_method = "distance",
+    additional_criterion = "pr_auc",
+    comp_thresholds = c(0.5, 0.8),
+    iter_retain = 200,
+    metrics = yardstick::metric_set(
+      yardstick::sens,
+      yardstick::spec,
+      yardstick::ppv
+    )
+  )
 
-  expect_equal(colnames(it_youden),
-               c(".threshold", "pr_auc", "sens", "spec", "ppv", "distance"))
+  expect_equal(
+    colnames(it_youden),
+    c(".threshold", "pr_auc", "sens", "spec", "ppv", "distance")
+  )
   expect_equal(typeof(it_youden$.threshold), "double")
   expect_s3_class(it_youden$pr_auc, "rvar")
   expect_s3_class(it_youden$sens, "rvar")
@@ -109,44 +128,64 @@ test_that("comparison thresholds work", {
   expect_s3_class(it_youden$distance, "rvar")
 
   expect_equal(length(it_youden$.threshold), 3L)
-  expect_equal(vapply(it_youden$pr_auc, posterior::ndraws, integer(1)),
-               c(200L, 200L, 200L))
   expect_equal(
-    vapply(it_youden$pr_auc,
-           \(x) posterior::E(posterior::rvar_is_na(x)),
-           double(1)),
+    vapply(it_youden$pr_auc, posterior::ndraws, integer(1)),
+    c(200L, 200L, 200L)
+  )
+  expect_equal(
+    vapply(
+      it_youden$pr_auc,
+      \(x) posterior::E(posterior::rvar_is_na(x)),
+      double(1)
+    ),
     c(0, 1, 1)
   )
-  expect_equal(vapply(it_youden$sens, posterior::ndraws, integer(1)),
-               c(200L, 200L, 200L))
   expect_equal(
-    vapply(it_youden$sens,
-           \(x) posterior::E(posterior::rvar_is_na(x)),
-           double(1)),
+    vapply(it_youden$sens, posterior::ndraws, integer(1)),
+    c(200L, 200L, 200L)
+  )
+  expect_equal(
+    vapply(
+      it_youden$sens,
+      \(x) posterior::E(posterior::rvar_is_na(x)),
+      double(1)
+    ),
     c(0, 0, 0)
   )
-  expect_equal(vapply(it_youden$spec, posterior::ndraws, integer(1)),
-               c(200L, 200L, 200L))
   expect_equal(
-    vapply(it_youden$spec,
-           \(x) posterior::E(posterior::rvar_is_na(x)),
-           double(1)),
+    vapply(it_youden$spec, posterior::ndraws, integer(1)),
+    c(200L, 200L, 200L)
+  )
+  expect_equal(
+    vapply(
+      it_youden$spec,
+      \(x) posterior::E(posterior::rvar_is_na(x)),
+      double(1)
+    ),
     c(0, 0, 0)
   )
-  expect_equal(vapply(it_youden$ppv, posterior::ndraws, integer(1)),
-               c(200L, 200L, 200L))
   expect_equal(
-    vapply(it_youden$ppv,
-           \(x) posterior::E(posterior::rvar_is_na(x)),
-           double(1)),
+    vapply(it_youden$ppv, posterior::ndraws, integer(1)),
+    c(200L, 200L, 200L)
+  )
+  expect_equal(
+    vapply(
+      it_youden$ppv,
+      \(x) posterior::E(posterior::rvar_is_na(x)),
+      double(1)
+    ),
     c(0, 0, 0)
   )
-  expect_equal(vapply(it_youden$distance, posterior::ndraws, integer(1)),
-               c(200L, 200L, 200L))
   expect_equal(
-    vapply(it_youden$distance,
-           \(x) posterior::E(posterior::rvar_is_na(x)),
-           double(1)),
+    vapply(it_youden$distance, posterior::ndraws, integer(1)),
+    c(200L, 200L, 200L)
+  )
+  expect_equal(
+    vapply(
+      it_youden$distance,
+      \(x) posterior::E(posterior::rvar_is_na(x)),
+      double(1)
+    ),
     c(0, 0, 0)
   )
 })

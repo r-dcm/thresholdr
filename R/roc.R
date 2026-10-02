@@ -16,13 +16,21 @@
 create_roc <- function(estimates, truth) {
   # input checks -----
   estimates <- check_double(estimates, lb = 0, ub = 1)
-  truth <- check_integer(truth, lb = 0L, ub = 1L,
-                         exp_length = length(estimates))
+  truth <- check_integer(
+    truth,
+    lb = 0L,
+    ub = 1L,
+    exp_length = length(estimates)
+  )
 
   # create data -----
   roc_dat <- estimate_tibble(estimates, truth)
-  roc_mod <- yardstick::roc_curve(roc_dat, truth = "truth", "estimate",
-                                  event_level = "second")
+  roc_mod <- yardstick::roc_curve(
+    roc_dat,
+    truth = "truth",
+    "estimate",
+    event_level = "second"
+  )
 
   return(roc_mod)
 }

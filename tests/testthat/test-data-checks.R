@@ -1,35 +1,50 @@
 test_that("abort_bad_argument", {
-  err <- rlang::catch_cnd(abort_bad_argument("size", must = "be an integer",
-                                             call = rlang::caller_env()))
+  err <- rlang::catch_cnd(abort_bad_argument(
+    "size",
+    must = "be an integer",
+    call = rlang::caller_env()
+  ))
   expect_s3_class(err, "rlang_error")
   expect_match(err$message, "be an integer")
 
-  err <- rlang::catch_cnd(abort_bad_argument("size", must = "be an integer",
-                                             not = "character",
-                                             call = rlang::caller_env()))
+  err <- rlang::catch_cnd(abort_bad_argument(
+    "size",
+    must = "be an integer",
+    not = "character",
+    call = rlang::caller_env()
+  ))
   expect_s3_class(err, "rlang_error")
   expect_match(err$message, "be an integer; not character")
 
-  err <- rlang::catch_cnd(abort_bad_argument("size", must = "be an integer",
-                                             extra = "please",
-                                             call = rlang::caller_env()))
+  err <- rlang::catch_cnd(abort_bad_argument(
+    "size",
+    must = "be an integer",
+    extra = "please",
+    call = rlang::caller_env()
+  ))
   expect_s3_class(err, "rlang_error")
   expect_match(err$message, "be an integer")
   expect_match(err$body, "please")
 
-  err <- rlang::catch_cnd(abort_bad_argument("size", must = "be an integer",
-                                             not = "character",
-                                             extra = "required",
-                                             call = rlang::caller_env()))
+  err <- rlang::catch_cnd(abort_bad_argument(
+    "size",
+    must = "be an integer",
+    not = "character",
+    extra = "required",
+    call = rlang::caller_env()
+  ))
   expect_s3_class(err, "rlang_error")
   expect_match(err$message, "be an integer; not character")
   expect_match(err$body, "required")
 
-  err <- rlang::catch_cnd(abort_bad_argument("size", must = "be an integer",
-                                             not = "character",
-                                             extra = "required",
-                                             custom = "A new error",
-                                             call = rlang::caller_env()))
+  err <- rlang::catch_cnd(abort_bad_argument(
+    "size",
+    must = "be an integer",
+    not = "character",
+    extra = "required",
+    custom = "A new error",
+    call = rlang::caller_env()
+  ))
   expect_s3_class(err, "rlang_error")
   expect_match(err$message, "A new error")
 })
@@ -150,8 +165,9 @@ test_that("check_prob_metric", {
   expect_s3_class(err, "rlang_error")
   expect_match(err$message, "must be a probability metric")
 
-  expect_s3_class(check_prob_metric("roc_auc"),
-                  c("prob_metric", "function"))
-  expect_s3_class(check_prob_metric("brier_class"),
-                  c("prob_metric", "function"))
+  expect_s3_class(check_prob_metric("roc_auc"), c("prob_metric", "function"))
+  expect_s3_class(
+    check_prob_metric("brier_class"),
+    c("prob_metric", "function")
+  )
 })

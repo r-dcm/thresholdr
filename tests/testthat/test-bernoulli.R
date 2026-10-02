@@ -17,8 +17,7 @@ test_that("random generation works", {
   iter <- 1L
   repeat {
     prob <- runif(n = 1, min = 0.1, max = 0.9)
-    expect_equal(mean(rbern(n = 50000, prob = prob)), prob,
-                 tolerance = 0.03)
+    expect_equal(mean(rbern(n = 50000, prob = prob)), prob, tolerance = 0.03)
 
     iter <- iter + 1
     if (iter > 4) {

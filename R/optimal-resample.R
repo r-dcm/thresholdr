@@ -64,9 +64,14 @@
 #' @examples
 #' est <- runif(100)
 #' optimal_resample(estimates = est, optimal_method = "youden", samples = 200)
-optimal_resample <- function(estimates, optimal_method, samples = 1000,
-                             weight_by = NULL, comp_thresholds = NULL,
-                             metrics = NULL) {
+optimal_resample <- function(
+  estimates,
+  optimal_method,
+  samples = 1000,
+  weight_by = NULL,
+  comp_thresholds = NULL,
+  metrics = NULL
+) {
   # check inputs -----
   estimates <- check_double(estimates, lb = 0, ub = 1)
   optimal_method <- rlang::arg_match(optimal_method, optimal_method_choices())
@@ -77,42 +82,54 @@ optimal_resample <- function(estimates, optimal_method, samples = 1000,
   } else {
     check_prob_metric(weight_by)
   }
-  comp_thresholds <- check_double(comp_thresholds, lb = 0, ub = 1,
-                                  allow_null = TRUE)
+  comp_thresholds <- check_double(
+    comp_thresholds,
+    lb = 0,
+    ub = 1,
+    allow_null = TRUE
+  )
 
   # identify needed functions -----
   optimal_function <- get_optimal_function(optimal_method)
 
   # calculate optimal threshold and performance -----
-  tibble::tibble(sample_id = seq_len(samples),
-                 estimates = list(estimates)) |>
+  tibble::tibble(sample_id = seq_len(samples), estimates = list(estimates)) |>
 
     # create data
     dplyr::mutate(
       truth = lapply(estimates, generate_truth),
-      dat = purrr::map2(.data$estimates, .data$truth,
-                        estimate_tibble)
+      dat = purrr::map2(.data$estimates, .data$truth, estimate_tibble)
     ) |>
 
     # calculate thresholds
     dplyr::mutate(
-      threshold = purrr::map2_dbl(.data$estimates, .data$truth,
-                                  optimal_function),
+      threshold = purrr::map2_dbl(
+        .data$estimates,
+        .data$truth,
+        optimal_function
+      ),
       wt_func = purrr::map_dbl(
         .data$dat,
         \(x) {
-          weight_function(x, truth = "truth", "estimate",
-                          event_level = "second") |>
+          weight_function(
+            x,
+            truth = "truth",
+            "estimate",
+            event_level = "second"
+          ) |>
             dplyr::pull(.data$.estimate)
         }
       ),
       weight = purrr::map_dbl(
         .data$wt_func,
         \(x, full, weight_by) {
-          if (weight_by == "identity") return(1)
+          if (weight_by == "identity") {
+            return(1)
+          }
           1 / sum(abs(x - full))
         },
-        full = .data$wt_func, weight_by = weight_by
+        full = .data$wt_func,
+        weight_by = weight_by
       ),
       wt_threshold = stats::weighted.mean(.data$threshold, .data$weight)
     ) |>
@@ -120,7 +137,8 @@ optimal_resample <- function(estimates, optimal_method, samples = 1000,
     # calculate performance
     dplyr::mutate(
       results = purrr::map2(
-        .data$dat, .data$wt_threshold,
+        .data$dat,
+        .data$wt_threshold,
         \(x, y, comp, metrics) {
           probably::threshold_perf(
             x,
@@ -131,10 +149,13 @@ optimal_resample <- function(estimates, optimal_method, samples = 1000,
             metrics = metrics
           ) |>
             dplyr::select(".threshold", ".metric", ".estimate") |>
-            tidyr::pivot_wider(names_from = ".metric",
-                               values_from = ".estimate")
+            tidyr::pivot_wider(
+              names_from = ".metric",
+              values_from = ".estimate"
+            )
         },
-        comp = comp_thresholds, metrics = metrics
+        comp = comp_thresholds,
+        metrics = metrics
       )
     ) |>
 
@@ -148,10 +169,16 @@ optimal_resample <- function(estimates, optimal_method, samples = 1000,
       )
     ) |>
     dplyr::rename(!!weight_by := "wt_func") |>
-    dplyr::select("sample_id", !!weight_by, ".threshold":dplyr::last_col(),
-                  -dplyr::any_of("identity")) |>
-    dplyr::summarize(dplyr::across(dplyr::where(is.double), posterior::rvar),
-                     .threshold = posterior::E(.data$.threshold),
-                     .by = ".threshold") |>
+    dplyr::select(
+      "sample_id",
+      !!weight_by,
+      ".threshold":dplyr::last_col(),
+      -dplyr::any_of("identity")
+    ) |>
+    dplyr::summarize(
+      dplyr::across(dplyr::where(is.double), posterior::rvar),
+      .threshold = posterior::E(.data$.threshold),
+      .by = ".threshold"
+    ) |>
     dplyr::relocate(".threshold", .before = 1)
 }

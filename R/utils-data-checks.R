@@ -71,8 +71,10 @@ check_length <- function(x, exp_length, arg, call) {
   if (!is.null(exp_length) && !(length(x) %in% exp_length)) {
     abort_bad_argument(
       arg = arg,
-      must = glue::glue("be of length ",
-                        "{knitr::combine_words(exp_length, and = ' or ')}"),
+      must = glue::glue(
+        "be of length ",
+        "{knitr::combine_words(exp_length, and = ' or ')}"
+      ),
       not = length(x),
       call = call
     )
