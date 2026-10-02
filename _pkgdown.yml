@@ -1,0 +1,8 @@
+url: https://thresholdr.r-dcm.org
+
+template:
+  package: rdcmtemplate
+  bootstrap: 5
+
+development:
+  mode: auto
