@@ -40,7 +40,7 @@ abort_bad_argument <- function(
 #'
 #' @param x The input value to be checked.
 #' @param ... Additional arguments passed to [rlang::check_number_decimal()] for
-#'   [check_double()] or [rlang::check_number_whole()] for [check_integer()].
+#'   `check_double()` or [rlang::check_number_whole()] for `check_integer()``.
 #' @param exp_length The expected value of `length(x)`. If `NULL`, any length is
 #'   accepted. If multiple lengths are acceptable, a vector can be specified
 #'   (e.g., `exp_length = c(1, 10)`).

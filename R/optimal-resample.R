@@ -10,7 +10,7 @@
 #' @param weight_by Optional. If provided, must be a class probability metric
 #'   from [yardstick][yardstick::yardstick-package]. Used to weight the optimal
 #'   threshold from each resample when calculating the overall optimal threshold
-#'   (see Details below). If `NULL` (the default), all resamples are weighted
+#'   (see details below). If `NULL` (the default), all resamples are weighted
 #'   equally.
 #' @param comp_thresholds Additional threshold values to evaluate against the
 #'   average optimal threshold (e.g., to compare the optimal threshold to a
@@ -60,6 +60,7 @@
 #'     (i.e., 1 column per specified metric).
 #' @export
 #' @family threshold approximation methods
+#' @concept rvar
 #'
 #' @examples
 #' est <- runif(100)

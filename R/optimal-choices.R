@@ -10,7 +10,7 @@ optimal_method_choices <- function() {
 #' Determine the function needed for each optimal threshold method
 #'
 #' @param method The method to use for finding the optimal threshold. Should be
-#'   one of the values included in [optimal_method_choices()].
+#'   one of the values included in `optimal_method_choices()`.
 #'
 #' @return The function that corresponds to the chosen method.
 #' @noRd
@@ -41,7 +41,7 @@ weighting_method_choices <- function() {
 #' Determine the function needed for each weighting method
 #'
 #' @param method The method to use for finding the optimal threshold. Should be
-#'   one of the values included in [weighting_method_choices()].
+#'   one of the values included in `weighting_method_choices()`.
 #'
 #' @return The function that corresponds to the chosen method.
 #' @noRd

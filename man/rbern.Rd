@@ -29,3 +29,4 @@ rbern(n = 10, prob = 0.5)
 \link[stats:Distributions]{Distributions} for other standard
 distributions, including \link[stats:dbinom]{dbinom} for the binomial.
 }
+\concept{Bernoulli}

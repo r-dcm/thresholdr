@@ -52,4 +52,5 @@ Other optimal threshold methods:
 \code{\link[=calc_gmean]{calc_gmean()}},
 \code{\link[=calc_topleft]{calc_topleft()}}
 }
+\concept{J}
 \concept{optimal threshold methods}

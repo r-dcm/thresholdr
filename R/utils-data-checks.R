@@ -2,8 +2,8 @@
 #'
 #' @param x The object to test.
 #' @param exp_length The expected length of `x`.
-#' @param arg The name of the argument, passed to [abort_bad_argument()].
-#' @param call The call stack, passed to [abort_bad_argument()].
+#' @param arg The name of the argument, passed to `abort_bad_argument()`.
+#' @param call The call stack, passed to `abort_bad_argument()`.
 #'
 #' @return Invisibly returns `x`.
 #' @noRd

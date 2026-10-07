@@ -10,13 +10,13 @@ shapes_to_muphi(shape1, shape2)
 muphi_to_shapes(mu, phi)
 }
 \arguments{
-\item{shape1}{The first shape parameter of the Beta distribution}
+\item{shape1}{The first shape parameter of the Beta distribution.}
 
-\item{shape2}{The second shape parameter of the Beta distribution}
+\item{shape2}{The second shape parameter of the Beta distribution.}
 
-\item{mu}{The mean of the Beta distribution}
+\item{mu}{The mean of the Beta distribution.}
 
-\item{phi}{The precision of the Beta distribution}
+\item{phi}{The precision of the Beta distribution.}
 }
 \value{
 A list with two elements containing either the converted shape
@@ -55,3 +55,4 @@ muphi_to_shapes(0.6, 10)
 \author{
 Andrew Heiss
 }
+\concept{Beta}

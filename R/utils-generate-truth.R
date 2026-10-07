@@ -4,10 +4,10 @@
 #' distribution; or, given a mean and precision, calculate the corresponding
 #' shape parameters.
 #'
-#' @param shape1 The first shape parameter of the Beta distribution
-#' @param shape2 The second shape parameter of the Beta distribution
-#' @param mu The mean of the Beta distribution
-#' @param phi The precision of the Beta distribution
+#' @param shape1 The first shape parameter of the Beta distribution.
+#' @param shape2 The second shape parameter of the Beta distribution.
+#' @param mu The mean of the Beta distribution.
+#' @param phi The precision of the Beta distribution.
 #'
 #' @details
 #' The Beta distribution is defined by two shape parameters, &alpha; and
@@ -31,6 +31,8 @@
 #' @return A list with two elements containing either the converted shape
 #'   parameters or mean and precision values.
 #' @export
+#'
+#' @concept Beta
 #'
 #' @examples
 #' shapes_to_muphi(6, 4)
@@ -62,9 +64,9 @@ muphi_to_shapes <- function(mu, phi) {
 
 #' Bound a variable between allowable values
 #'
-#' @param x A numeric value
-#' @param lb The lower bound of allowable values
-#' @param ub The upper bound of allowable values
+#' @param x A numeric value.
+#' @param lb The lower bound of allowable values.
+#' @param ub The upper bound of allowable values.
 #' @param buffer A buffer around `lb` and `ub`. For example, with an `lb` of 0
 #'   and `buffer` of 1e-5, all values less than 0 would be set to 1e-5.
 #'

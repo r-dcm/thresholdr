@@ -10,6 +10,8 @@
 #'   distributions, including [dbinom][stats::dbinom()] for the binomial.
 #' @export
 #'
+#' @concept Bernoulli
+#'
 #' @examples
 #' # Generate random Bernoulli variables
 #' rbern(n = 10, prob = 0.5)

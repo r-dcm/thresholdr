@@ -13,7 +13,7 @@ generate_beta_wt_truth(estimates, threshold = 0.5, ..., precision = 2)
 generate_distance_wt_truth(estimates, threshold = 0.5, ...)
 }
 \arguments{
-\item{estimates}{A vector of probabilities}
+\item{estimates}{A vector of probabilities.}
 
 \item{...}{Currently unused.}
 
@@ -21,7 +21,7 @@ generate_distance_wt_truth(estimates, threshold = 0.5, ...)
 classification threshold.}
 
 \item{precision}{For Beta-weighted generation, the precision for the Beta
-distribution. See Details for specifics.}
+distribution. See details for specifics.}
 }
 \value{
 An integer vector of \code{0} and \code{1}, the same length as \code{estimates}.
@@ -71,3 +71,4 @@ W. Jake Thompson
 
 Jonathan A. Pedroza
 }
+\concept{Beta}

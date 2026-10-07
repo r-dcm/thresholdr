@@ -11,8 +11,8 @@
 #' @param additional_criterion Optional. If provided, must be a class
 #'   probability metric from [yardstick][yardstick::yardstick-package].
 #' @param iter_burnin The number of iterations to run and then discard (see
-#'   Details below).
-#' @param iter_retain The number of iterations to retain (see Details below).
+#'   details below).
+#' @param iter_retain The number of iterations to retain (see details below).
 #'
 #' @details
 #' To initialize the iteration process, a vector of "true" values is generated
@@ -64,6 +64,7 @@
 #'     iterations (i.e., 1 column per specified metric).
 #' @export
 #' @family threshold approximation methods
+#' @concept rvar
 #'
 #' @examples
 #' est <- runif(100)

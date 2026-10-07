@@ -3,11 +3,11 @@
 #' For each probability a binary outcome is generated. In practice, it is likely
 #' useful generate multiple truth values that can be tested.
 #'
-#' @param estimates A vector of probabilities
+#' @param estimates A vector of probabilities.
 #' @param threshold For Beta- and distance-weighted generation, the probability
 #'   classification threshold.
 #' @param precision For Beta-weighted generation, the precision for the Beta
-#'   distribution. See Details for specifics.
+#'   distribution. See details for specifics.
 #' @param ... Currently unused.
 #'
 #' @details
@@ -41,6 +41,8 @@
 #'
 #' @return An integer vector of `0` and `1`, the same length as `estimates`.
 #' @export
+#'
+#' @concept Beta
 #'
 #' @examples
 #' generate_truth(runif(10))

@@ -24,7 +24,7 @@ optimal_resample(
 \item{weight_by}{Optional. If provided, must be a class probability metric
 from \link[yardstick:yardstick-package]{yardstick}. Used to weight the optimal
 threshold from each resample when calculating the overall optimal threshold
-(see Details below). If \code{NULL} (the default), all resamples are weighted
+(see details below). If \code{NULL} (the default), all resamples are weighted
 equally.}
 
 \item{comp_thresholds}{Additional threshold values to evaluate against the
@@ -90,4 +90,5 @@ optimal_resample(estimates = est, optimal_method = "youden", samples = 200)
 Other threshold approximation methods:
 \code{\link[=optimal_iterate]{optimal_iterate()}}
 }
+\concept{rvar}
 \concept{threshold approximation methods}

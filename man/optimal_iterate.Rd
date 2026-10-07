@@ -32,9 +32,9 @@ by the current estimate of the optimal threshold. One of
 probability metric from \link[yardstick:yardstick-package]{yardstick}.}
 
 \item{iter_burnin}{The number of iterations to run and then discard (see
-Details below).}
+details below).}
 
-\item{iter_retain}{The number of iterations to retain (see Details below).}
+\item{iter_retain}{The number of iterations to retain (see details below).}
 
 \item{comp_thresholds}{Additional threshold values to evaluate against the
 average optimal threshold (e.g., to compare the optimal threshold to a
@@ -120,4 +120,5 @@ P.-C. (2021). Rank-normalization, folding, and localization: An improved
 Other threshold approximation methods:
 \code{\link[=optimal_resample]{optimal_resample()}}
 }
+\concept{rvar}
 \concept{threshold approximation methods}

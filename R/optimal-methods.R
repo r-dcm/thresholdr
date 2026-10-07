@@ -18,6 +18,7 @@
 #' @return A numeric scalar representing the optimal probability threshold.
 #' @export
 #' @family optimal threshold methods
+#' @concept J
 #'
 #' @examples
 #' calc_youden(estimates = dcm_probs$att1$estimate,
