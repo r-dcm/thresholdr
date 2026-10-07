@@ -34,9 +34,8 @@
 #'   \doi{10.1002/1097-0142(1950)3:1<32::AID-CNCR2820030106>3.0.CO;2-3}
 calc_youden <- function(estimates, truth) {
   # input checks -----
-  estimates <- check_double(estimates, lb = 0, ub = 1)
-  truth <- check_integer(truth, lb = 0L, ub = 1L,
-                         exp_length = length(estimates))
+  check_double(estimates, min = 0, max = 1)
+  check_integer(truth, min = 0, max = 1, exp_length = length(estimates))
 
   # calculate threshold -----
   roc <- create_roc(estimates = estimates, truth = truth)
@@ -81,16 +80,17 @@ calc_youden <- function(estimates, truth) {
 #'              truth = dcm_probs$att3$truth)
 calc_topleft <- function(estimates, truth) {
   # input checks -----
-  estimates <- check_double(estimates, lb = 0, ub = 1)
-  truth <- check_integer(truth, lb = 0L, ub = 1L,
-                         exp_length = length(estimates))
+  check_double(estimates, min = 0, max = 1)
+  check_integer(truth, min = 0, max = 1, exp_length = length(estimates))
 
   # calculate threshold -----
   roc <- create_roc(estimates = estimates, truth = truth)
 
   tl <- roc |>
-    dplyr::mutate(topleft = ((1 - .data$sensitivity) ^ 2) +
-                    ((1 - .data$specificity) ^ 2)) |>
+    dplyr::mutate(
+      topleft = ((1 - .data$sensitivity)^2) +
+        ((1 - .data$specificity)^2)
+    ) |>
     dplyr::slice_min(order_by = .data$topleft, n = 1, with_ties = FALSE) |>
     dplyr::pull(".threshold")
 
@@ -135,9 +135,8 @@ calc_topleft <- function(estimates, truth) {
 #'   \doi{10.1002/sim.4509}
 calc_cz <- function(estimates, truth) {
   # input checks -----
-  estimates <- check_double(estimates, lb = 0, ub = 1)
-  truth <- check_integer(truth, lb = 0L, ub = 1L,
-                         exp_length = length(estimates))
+  check_double(estimates, min = 0, max = 1)
+  check_integer(truth, min = 0, max = 1, exp_length = length(estimates))
 
   # calculate threshold -----
   roc <- create_roc(estimates = estimates, truth = truth)
@@ -186,9 +185,8 @@ calc_cz <- function(estimates, truth) {
 #' International Conference on Machine Learning, Nashville, TN.
 calc_gmean <- function(estimates, truth) {
   # input checks -----
-  estimates <- check_double(estimates, lb = 0, ub = 1)
-  truth <- check_integer(truth, lb = 0L, ub = 1L,
-                         exp_length = length(estimates))
+  check_double(estimates, min = 0, max = 1)
+  check_integer(truth, min = 0, max = 1, exp_length = length(estimates))
 
   # calculate threshold -----
   roc <- create_roc(estimates = estimates, truth = truth)

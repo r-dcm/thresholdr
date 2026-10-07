@@ -17,12 +17,14 @@ optimal_method_choices <- function() {
 get_optimal_function <- function(method) {
   rlang::arg_match(method, values = optimal_method_choices())
 
-  switch(method,
-         "youden" = calc_youden,
-         "topleft" = calc_topleft,
-         "cz" = calc_cz,
-         "gmean" = calc_gmean,
-         cli::cli_abort("No function found for {.arg method = \"{method}\"}"))
+  switch(
+    method,
+    "youden" = calc_youden,
+    "topleft" = calc_topleft,
+    "cz" = calc_cz,
+    "gmean" = calc_gmean,
+    cli::cli_abort("No function found for {.arg method = \"{method}\"}")
+  )
 }
 
 
@@ -46,8 +48,10 @@ weighting_method_choices <- function() {
 get_weighting_function <- function(method) {
   rlang::arg_match(method, values = weighting_method_choices())
 
-  switch(method,
-         "beta" = generate_beta_wt_truth,
-         "distance" = generate_distance_wt_truth,
-         cli::cli_abort("No function found for {.arg method = \"{method}\"}"))
+  switch(
+    method,
+    "beta" = generate_beta_wt_truth,
+    "distance" = generate_distance_wt_truth,
+    cli::cli_abort("No function found for {.arg method = \"{method}\"}")
+  )
 }

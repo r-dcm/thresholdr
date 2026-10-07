@@ -40,8 +40,8 @@
 #' @rdname beta-conversion
 #' @author Andrew Heiss
 shapes_to_muphi <- function(shape1, shape2) {
-  shape1 <- check_double(shape1, lb = 0, inclusive = FALSE)
-  shape2 <- check_double(shape2, lb = 0, inclusive = FALSE)
+  rlang::check_number_decimal(shape1, min = 0)
+  rlang::check_number_decimal(shape2, min = 0)
 
   mu <- shape1 / (shape1 + shape2)
   phi <- shape1 + shape2
@@ -51,8 +51,8 @@ shapes_to_muphi <- function(shape1, shape2) {
 #' @export
 #' @rdname beta-conversion
 muphi_to_shapes <- function(mu, phi) {
-  mu <- check_double(mu, lb = 0, ub = 1, inclusive = FALSE)
-  phi <- check_double(phi, lb = 0, inclusive = FALSE)
+  rlang::check_number_decimal(mu, min = 0, max = 1)
+  rlang::check_number_decimal(phi, min = 0)
 
   shape1 <- mu * phi
   shape2 <- (1 - mu) * phi

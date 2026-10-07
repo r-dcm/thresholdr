@@ -22,6 +22,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item W. Jake Thompson \email{wjakethompson@gmail.com} (\href{https://orcid.org/0000-0001-7339-0300}{ORCID})
   \item Jonathan A. Pedroza
 }
 

@@ -49,36 +49,46 @@
 #'
 #' generate_distance_wt_truth(runif(10), threshold = 0.6)
 generate_truth <- function(estimates, ...) {
-  estimates <- check_double(estimates, lb = 0, ub = 1)
-
+  check_double(estimates, min = 0, max = 1)
   vapply(estimates, \(x) rbern(n = 1, prob = x), integer(1))
 }
 
 #' @author W. Jake Thompson
 #' @export
 #' @rdname generate_truth
-generate_beta_wt_truth <- function(estimates, threshold = 0.5, ...,
-                                   precision = 2) {
-  estimates <- check_double(estimates, lb = 0, ub = 1)
-  threshold <- check_double(threshold, lb = 0, ub = 1)
-  precision <- check_double(precision, lb = 0, inclusive = FALSE)
+generate_beta_wt_truth <- function(
+  estimates,
+  threshold = 0.5,
+  ...,
+  precision = 2
+) {
+  check_double(estimates, min = 0, max = 1)
+  rlang::check_number_decimal(threshold)
+  rlang::check_number_decimal(precision)
 
   beta_shapes <- muphi_to_shapes(mu = threshold, phi = precision)
 
-  as.integer(estimates > stats::rbeta(n = length(estimates),
-                                      shape1 = beta_shapes$shape1,
-                                      shape2 = beta_shapes$shape2))
+  as.integer(
+    estimates >
+      stats::rbeta(
+        n = length(estimates),
+        shape1 = beta_shapes$shape1,
+        shape2 = beta_shapes$shape2
+      )
+  )
 }
 
 #' @author Jonathan A. Pedroza
 #' @export
 #' @rdname generate_truth
 generate_distance_wt_truth <- function(estimates, threshold = 0.5, ...) {
-  estimates <- check_double(estimates, lb = 0, ub = 1)
-  threshold <- check_double(threshold, lb = 0, ub = 1)
+  check_double(estimates, min = 0, max = 1)
+  rlang::check_number_decimal(threshold, min = 0, max = 1)
 
-  bound(estimates - threshold + .5,
-        lb = max(0 - threshold + 0.5, 0),
-        ub = min(1 - threshold + 0.5, 1)) |>
+  bound(
+    estimates - threshold + .5,
+    lb = max(0 - threshold + 0.5, 0),
+    ub = min(1 - threshold + 0.5, 1)
+  ) |>
     generate_truth()
 }
