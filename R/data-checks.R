@@ -121,5 +121,5 @@ check_prob_metric <- function(
     cli::cli_abort(msg, call = call)
   }
 
-  return(ys_obj)
+  ys_obj
 }

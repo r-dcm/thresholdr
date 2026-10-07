@@ -45,7 +45,7 @@ shapes_to_muphi <- function(shape1, shape2) {
 
   mu <- shape1 / (shape1 + shape2)
   phi <- shape1 + shape2
-  return(list(mu = mu, phi = phi))
+  list(mu = mu, phi = phi)
 }
 
 #' @export
@@ -56,7 +56,7 @@ muphi_to_shapes <- function(mu, phi) {
 
   shape1 <- mu * phi
   shape2 <- (1 - mu) * phi
-  return(list(shape1 = shape1, shape2 = shape2))
+  list(shape1 = shape1, shape2 = shape2)
 }
 
 

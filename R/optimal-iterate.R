@@ -245,5 +245,5 @@ optimal_iterate <- function(
     attr(results, "converged") <- TRUE
   }
 
-  return(results)
+  results
 }

@@ -45,7 +45,7 @@ calc_youden <- function(estimates, truth) {
     dplyr::slice_max(order_by = .data$youden, n = 1, with_ties = FALSE) |>
     dplyr::pull(".threshold")
 
-  return(yd)
+  yd
 }
 
 
@@ -94,7 +94,7 @@ calc_topleft <- function(estimates, truth) {
     dplyr::slice_min(order_by = .data$topleft, n = 1, with_ties = FALSE) |>
     dplyr::pull(".threshold")
 
-  return(tl)
+  tl
 }
 
 
@@ -146,7 +146,7 @@ calc_cz <- function(estimates, truth) {
     dplyr::slice_max(order_by = .data$cz, n = 1, with_ties = FALSE) |>
     dplyr::pull(".threshold")
 
-  return(cz)
+  cz
 }
 
 
@@ -196,5 +196,5 @@ calc_gmean <- function(estimates, truth) {
     dplyr::slice_max(order_by = .data$g, n = 1, with_ties = FALSE) |>
     dplyr::pull(".threshold")
 
-  return(g)
+  g
 }

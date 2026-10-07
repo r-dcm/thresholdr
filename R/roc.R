@@ -27,5 +27,5 @@ create_roc <- function(estimates, truth) {
     event_level = "second"
   )
 
-  return(roc_mod)
+  roc_mod
 }
