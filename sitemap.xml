@@ -1,63 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https:/thresholdr.measr.info/404.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/CODE_OF_CONDUCT.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/CONTRIBUTING.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/authors.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/index.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/reference/beta-conversion.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/reference/calc_cz.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/reference/calc_gmean.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/reference/calc_topleft.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/reference/calc_youden.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/reference/create_roc.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/reference/dcm_probs.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/reference/generate_truth.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/reference/optimal_iterate.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/reference/optimal_resample.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/reference/rbern.html</loc>
-  </url>
-  <url>
-    <loc>https:/thresholdr.measr.info/reference/thresholdr-package.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://thresholdr.r-dcm.org/404.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/CODE_OF_CONDUCT.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/CONTRIBUTING.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/LICENSE-text.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/LICENSE.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/authors.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/index.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/reference/beta-conversion.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/reference/calc_cz.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/reference/calc_gmean.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/reference/calc_topleft.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/reference/calc_youden.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/reference/create_roc.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/reference/dcm_probs.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/reference/generate_truth.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/reference/index.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/reference/optimal_iterate.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/reference/optimal_resample.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/reference/rbern.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/reference/reexports.html</loc></url>
+<url><loc>https://thresholdr.r-dcm.org/reference/thresholdr-package.html</loc></url>
 </urlset>
+

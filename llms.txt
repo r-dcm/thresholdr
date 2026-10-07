@@ -1,0 +1,85 @@
+# thresholdr
+
+The goal of thresholdr is to estimate optimal probability thresholds for
+determining classifications when the true state is unknown, such as when
+using diagnostic classification models.
+
+## Installation
+
+You can install the development version of thresholdr like so:
+
+``` r
+
+# install.packages("remotes")
+remotes::install_github("r-dcm/thresholdr")
+```
+
+## Example usage
+
+There the true classifications are known, we can determine the optimal
+threshold using a supported method, such as Youden’s J statistic. For
+example, using simulated data where the true attribute classifications
+are known, we can calculate the optimal probability classification
+threshold using
+[`calc_youden()`](https://thresholdr.r-dcm.org/reference/calc_youden.md):
+
+``` r
+
+library(thresholdr)
+
+calc_youden(estimates = dcm_probs$att1$estimate,
+            truth = dcm_probs$att1$truth)
+#> [1] 0.3170266
+```
+
+However, in practice the true attribute classifications are unknown. In
+this scenario, we can estimate what the optimal threshold should be
+using, for example, resampling:
+
+``` r
+
+optimal_resample(estimates = dcm_probs$att1$estimate, optimal_method = "youden")
+#> # A tibble: 1 × 4
+#>   .threshold  sensitivity   specificity      j_index
+#>        <dbl>   <rvar[1d]>    <rvar[1d]>   <rvar[1d]>
+#> 1      0.381  0.89 ± 0.02  0.91 ± 0.012  0.8 ± 0.025
+```
+
+This results in a threshold that is similar, although slightly higher,
+than what we know the true optimal threshold should be. We can also
+visualize our estimate on an ROC curve. Here again we see that our
+estimated optimal threshold from the resamples are very close to the
+true value.
+
+![](reference/figures/README-unnamed-chunk-3-1.png)
+
+# Package index
+
+## All functions
+
+- [`shapes_to_muphi()`](https://thresholdr.r-dcm.org/reference/beta-conversion.md)
+  [`muphi_to_shapes()`](https://thresholdr.r-dcm.org/reference/beta-conversion.md)
+  : Convert between parametrizations of the Beta distribution
+- [`calc_cz()`](https://thresholdr.r-dcm.org/reference/calc_cz.md) :
+  Concordance probability method
+- [`calc_gmean()`](https://thresholdr.r-dcm.org/reference/calc_gmean.md)
+  : G-mean method
+- [`calc_topleft()`](https://thresholdr.r-dcm.org/reference/calc_topleft.md)
+  : Top-left statistic
+- [`calc_youden()`](https://thresholdr.r-dcm.org/reference/calc_youden.md)
+  : Youden's J statistic
+- [`create_roc()`](https://thresholdr.r-dcm.org/reference/create_roc.md)
+  : Calculate a receiver operating characteristic curve
+- [`dcm_probs`](https://thresholdr.r-dcm.org/reference/dcm_probs.md) :
+  Example probabilities from a diagnostic classification model
+- [`generate_truth()`](https://thresholdr.r-dcm.org/reference/generate_truth.md)
+  [`generate_beta_wt_truth()`](https://thresholdr.r-dcm.org/reference/generate_truth.md)
+  [`generate_distance_wt_truth()`](https://thresholdr.r-dcm.org/reference/generate_truth.md)
+  : Generate binary values from a vector of probabilities
+- [`optimal_iterate()`](https://thresholdr.r-dcm.org/reference/optimal_iterate.md)
+  : Use iteration to estimate an optimal probability threshold
+- [`optimal_resample()`](https://thresholdr.r-dcm.org/reference/optimal_resample.md)
+  : Use resampling to estimate an optimal probability threshold
+- [`rbern()`](https://thresholdr.r-dcm.org/reference/rbern.md) : Random
+  Bernoulli draws
+
