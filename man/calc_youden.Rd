@@ -31,14 +31,20 @@ criterion is then defined as:
 \deqn{\text{max}(sensitivity + specificity - 1)}
 }
 \examples{
-calc_youden(estimates = dcm_probs$att1$estimate,
-            truth = dcm_probs$att1$truth)
+calc_youden(
+  estimates = dcm_probs$att1$estimate,
+  truth = dcm_probs$att1$truth
+)
 
-calc_youden(estimates = dcm_probs$att2$estimate,
-            truth = dcm_probs$att2$truth)
+calc_youden(
+  estimates = dcm_probs$att2$estimate,
+  truth = dcm_probs$att2$truth
+)
 
-calc_youden(estimates = dcm_probs$att3$estimate,
-            truth = dcm_probs$att3$truth)
+calc_youden(
+  estimates = dcm_probs$att3$estimate,
+  truth = dcm_probs$att3$truth
+)
 
 }
 \references{
@@ -50,6 +56,8 @@ Youden, W. J. (1950). Index for rating diagnostic tests.
 Other optimal threshold methods:
 \code{\link[=calc_cz]{calc_cz()}},
 \code{\link[=calc_gmean]{calc_gmean()}},
+\code{\link[=calc_iu]{calc_iu()}},
+\code{\link[=calc_minp]{calc_minp()}},
 \code{\link[=calc_topleft]{calc_topleft()}}
 }
 \concept{J}

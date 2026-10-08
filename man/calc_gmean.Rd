@@ -30,14 +30,20 @@ The optimality criterion is then defined as:
 \deqn{\text{max}\sqrt{(sensitivity * specificity)}}
 }
 \examples{
-calc_gmean(estimates = dcm_probs$att1$estimate,
-            truth = dcm_probs$att1$truth)
+calc_gmean(
+  estimates = dcm_probs$att1$estimate,
+  truth = dcm_probs$att1$truth
+)
 
-calc_gmean(estimates = dcm_probs$att2$estimate,
-            truth = dcm_probs$att2$truth)
+calc_gmean(
+  estimates = dcm_probs$att2$estimate,
+  truth = dcm_probs$att2$truth
+)
 
-calc_gmean(estimates = dcm_probs$att3$estimate,
-            truth = dcm_probs$att3$truth)
+calc_gmean(
+  estimates = dcm_probs$att3$estimate,
+  truth = dcm_probs$att3$truth
+)
 
 }
 \references{
@@ -48,6 +54,8 @@ International Conference on Machine Learning, Nashville, TN.
 \seealso{
 Other optimal threshold methods:
 \code{\link[=calc_cz]{calc_cz()}},
+\code{\link[=calc_iu]{calc_iu()}},
+\code{\link[=calc_minp]{calc_minp()}},
 \code{\link[=calc_topleft]{calc_topleft()}},
 \code{\link[=calc_youden]{calc_youden()}}
 }

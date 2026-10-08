@@ -32,14 +32,20 @@ The optimality criterion is then defined as:
 \deqn{\text{max}(sensitivity * specificity)}
 }
 \examples{
-calc_cz(estimates = dcm_probs$att1$estimate,
-            truth = dcm_probs$att1$truth)
+calc_cz(
+  estimates = dcm_probs$att1$estimate,
+  truth = dcm_probs$att1$truth
+)
 
-calc_cz(estimates = dcm_probs$att2$estimate,
-            truth = dcm_probs$att2$truth)
+calc_cz(
+  estimates = dcm_probs$att2$estimate,
+  truth = dcm_probs$att2$truth
+)
 
-calc_cz(estimates = dcm_probs$att3$estimate,
-            truth = dcm_probs$att3$truth)
+calc_cz(
+  estimates = dcm_probs$att3$estimate,
+  truth = dcm_probs$att3$truth
+)
 
 }
 \references{
@@ -50,6 +56,8 @@ Liu, X. (2012). Classification accuracy and cut point selection.
 \seealso{
 Other optimal threshold methods:
 \code{\link[=calc_gmean]{calc_gmean()}},
+\code{\link[=calc_iu]{calc_iu()}},
+\code{\link[=calc_minp]{calc_minp()}},
 \code{\link[=calc_topleft]{calc_topleft()}},
 \code{\link[=calc_youden]{calc_youden()}}
 }

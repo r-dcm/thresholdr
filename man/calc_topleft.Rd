@@ -30,19 +30,33 @@ corner is the optimal threshold. The optimality criterion is then defined as:
 \deqn{\text{min}((1 - sensitivity)^2 + (1 - specificity)^2)}
 }
 \examples{
-calc_topleft(estimates = dcm_probs$att1$estimate,
-             truth = dcm_probs$att1$truth)
+calc_topleft(
+  estimates = dcm_probs$att1$estimate,
+  truth = dcm_probs$att1$truth
+)
 
-calc_topleft(estimates = dcm_probs$att2$estimate,
-             truth = dcm_probs$att2$truth)
+calc_topleft(
+  estimates = dcm_probs$att2$estimate,
+  truth = dcm_probs$att2$truth
+)
 
-calc_topleft(estimates = dcm_probs$att3$estimate,
-             truth = dcm_probs$att3$truth)
+calc_topleft(
+  estimates = dcm_probs$att3$estimate,
+  truth = dcm_probs$att3$truth
+)
+
+}
+\references{
+Perkins, N. J., and Schisterman, E. F. (2006). The inconsistency
+of "optimal" cut-points using two ROC based criteria. \emph{American Journal of
+Epidemiology, 163}(7), 670-675. \doi{10.1093/aje/kwj063}
 }
 \seealso{
 Other optimal threshold methods:
 \code{\link[=calc_cz]{calc_cz()}},
 \code{\link[=calc_gmean]{calc_gmean()}},
+\code{\link[=calc_iu]{calc_iu()}},
+\code{\link[=calc_minp]{calc_minp()}},
 \code{\link[=calc_youden]{calc_youden()}}
 }
 \concept{optimal threshold methods}

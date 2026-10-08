@@ -24,7 +24,7 @@ by the current estimate of the optimal threshold. One of
 "beta", "distance".}
 
 \item{optimal_method}{The method for estimating the optimal threshold. One of
-"youden", "topleft", "cz", "gmean".}
+"youden", "topleft", "cz", "gmean", "iu", "minp".}
 
 \item{...}{Additional arguments passed to the corresponding weighting method.}
 

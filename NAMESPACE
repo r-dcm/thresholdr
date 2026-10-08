@@ -2,6 +2,8 @@
 
 export(calc_cz)
 export(calc_gmean)
+export(calc_iu)
+export(calc_minp)
 export(calc_topleft)
 export(calc_youden)
 export(create_roc)
