@@ -30,14 +30,20 @@ Imports:
     probably,
     purrr,
     rlang,
+    S7,
     tibble,
     tidyr,
     yardstick
 Suggests: 
+    CDM,
+    GDINA,
     knitr,
+    measr,
     rmarkdown,
     spelling,
     testthat (>= 3.0.0)
+Remotes:
+    RConsortium/S7
 VignetteBuilder: 
     knitr
 Config/testthat/edition: 3
@@ -48,4 +54,4 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE, roclets = c("namespace", "rd", "roxylint::roxylint"))
 Language: en-US
-Config/roxygen2/version: 8.0.0
+Config/roxygen2/version: 8.1.0

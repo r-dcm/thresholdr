@@ -43,7 +43,8 @@ probabilities. A set of default metrics is used when \code{NULL} (see
 A \link[tibble:tibble-package]{tibble} with 1 row per threshold. The
 columns are:
 \itemize{
-\item \code{.threshold}: The averaged optimal threshold.
+\item \code{threshold}: The averaged optimal threshold and any specified
+\code{comp_thresholds}.
 \item If \code{weight_by} was specified, an \link[posterior:rvar]{rvar} containing the
 distribution of class probability metrics across all samples.
 \item A set of \link[posterior:rvar]{rvar} objects for each of the specified

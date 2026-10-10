@@ -55,7 +55,7 @@
 #'
 #' @return A [tibble][tibble::tibble-package] with 1 row per threshold. The
 #' columns are:
-#'   * `.threshold`: The optimal threshold.
+#'   * `threshold`: The optimal threshold and any specified `comp_thresholds`.
 #'   * If `additional_criterion` was specified, an [rvar][posterior::rvar()]
 #'     containing the distribution of class probability metrics across all
 #'     retained iterations.
@@ -77,9 +77,9 @@
 #'   *Bayesian Analysis, 16*(2), 667-718. \doi{10.1214/20-BA1221}
 optimal_iterate <- function(
   estimates,
-  weighting_method,
   optimal_method,
   ...,
+  weighting_method = "beta",
   additional_criterion = NULL,
   iter_burnin = 100,
   iter_retain = 1000,
@@ -229,7 +229,8 @@ optimal_iterate <- function(
       .threshold = posterior::E(.data$.threshold),
       .by = ".threshold"
     ) |>
-    dplyr::relocate(".threshold", .before = 1)
+    dplyr::relocate(".threshold", .before = 1) |>
+    dplyr::rename(threshold = ".threshold")
 
   # print diagnostics and return -----
   if (any(chain_diagnostics$rhat > 1.01)) {

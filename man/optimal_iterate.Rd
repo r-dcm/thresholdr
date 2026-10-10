@@ -6,9 +6,9 @@
 \usage{
 optimal_iterate(
   estimates,
-  weighting_method,
   optimal_method,
   ...,
+  weighting_method = "beta",
   additional_criterion = NULL,
   iter_burnin = 100,
   iter_retain = 1000,
@@ -19,14 +19,14 @@ optimal_iterate(
 \arguments{
 \item{estimates}{A vector of probabilities.}
 
-\item{weighting_method}{The method for generating classifications, weighted
-by the current estimate of the optimal threshold. One of
-"beta", "distance".}
-
 \item{optimal_method}{The method for estimating the optimal threshold. One of
 "youden", "topleft", "cz", "gmean", "iu", "minp".}
 
 \item{...}{Additional arguments passed to the corresponding weighting method.}
+
+\item{weighting_method}{The method for generating classifications, weighted
+by the current estimate of the optimal threshold. One of
+"beta", "distance".}
 
 \item{additional_criterion}{Optional. If provided, must be a class
 probability metric from \link[yardstick:yardstick-package]{yardstick}.}
@@ -52,7 +52,7 @@ probabilities. A set of default metrics is used when \code{NULL} (see
 A \link[tibble:tibble-package]{tibble} with 1 row per threshold. The
 columns are:
 \itemize{
-\item \code{.threshold}: The optimal threshold.
+\item \code{threshold}: The optimal threshold and any specified \code{comp_thresholds}.
 \item If \code{additional_criterion} was specified, an \link[posterior:rvar]{rvar}
 containing the distribution of class probability metrics across all
 retained iterations.

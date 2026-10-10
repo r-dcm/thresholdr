@@ -52,7 +52,8 @@
 #'
 #' @return A [tibble][tibble::tibble-package] with 1 row per threshold. The
 #' columns are:
-#'   * `.threshold`: The averaged optimal threshold.
+#'   * `threshold`: The averaged optimal threshold and any specified
+#'     `comp_thresholds`.
 #'   * If `weight_by` was specified, an [rvar][posterior::rvar()] containing the
 #'     distribution of class probability metrics across all samples.
 #'   * A set of [rvar][posterior::rvar()] objects for each of the specified
@@ -176,5 +177,6 @@ optimal_resample <- function(
       .threshold = posterior::E(.data$.threshold),
       .by = ".threshold"
     ) |>
-    dplyr::relocate(".threshold", .before = 1)
+    dplyr::relocate(".threshold", .before = 1) |>
+    dplyr::rename(threshold = ".threshold")
 }
