@@ -41,6 +41,24 @@ test_that("measrdcm method works", {
     comp_thresholds = c(.5, .8),
     metrics = metric_set(yardstick::ppv, yardstick::recall)
   )
+  expect_s3_class(thld, "tbl_df")
+  expect_equal(nrow(thld), (ncol(dcmdata::pie_ft_qmatrix) - 1) * 3)
+  expect_equal(
+    colnames(thld),
+    c(
+      "attribute",
+      "threshold",
+      "ppv",
+      "recall"
+    )
+  )
+  expect_equal(
+    thld$attribute,
+    rep(colnames(dcmdata::pie_ft_qmatrix)[-1], each = 3)
+  )
+  expect_type(thld$threshold, "double")
+  expect_s3_class(thld$ppv, "rvar")
+  expect_s3_class(thld$recall, "rvar")
 })
 
 test_that("GDINA method works", {

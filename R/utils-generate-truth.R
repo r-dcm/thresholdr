@@ -67,6 +67,8 @@ muphi_to_shapes <- function(mu, phi) {
 #' @param median The desired median of the Beta distribution.
 #' @param phi The precision of the Beta distribution.
 #'
+#' @concept Beta
+#'
 #' @return The mean (&mu;) of the Beta distribution with precision `phi` and a
 #'   median of `median`.
 #' @noRd

@@ -45,14 +45,10 @@ calc_youden <- function(estimates, truth) {
   check_integer(truth, min = 0, max = 1, exp_length = length(estimates))
 
   # calculate threshold -----
-  roc <- create_roc(estimates = estimates, truth = truth)
+  roc <- roc_table(estimates = estimates, truth = truth)
 
-  yd <- roc |>
-    dplyr::mutate(youden = .data$sensitivity + .data$specificity - 1) |>
-    dplyr::slice_max(order_by = .data$youden, n = 1, with_ties = FALSE) |>
-    dplyr::pull(".threshold")
-
-  yd
+  youden <- roc$sensitivity + roc$specificity - 1
+  roc$.threshold[which.max(youden)]
 }
 
 
@@ -101,17 +97,10 @@ calc_topleft <- function(estimates, truth) {
   check_integer(truth, min = 0, max = 1, exp_length = length(estimates))
 
   # calculate threshold -----
-  roc <- create_roc(estimates = estimates, truth = truth)
+  roc <- roc_table(estimates = estimates, truth = truth)
 
-  tl <- roc |>
-    dplyr::mutate(
-      topleft = ((1 - .data$sensitivity)^2) +
-        ((1 - .data$specificity)^2)
-    ) |>
-    dplyr::slice_min(order_by = .data$topleft, n = 1, with_ties = FALSE) |>
-    dplyr::pull(".threshold")
-
-  tl
+  topleft <- ((1 - roc$sensitivity)^2) + ((1 - roc$specificity)^2)
+  roc$.threshold[which.min(topleft)]
 }
 
 
@@ -162,14 +151,10 @@ calc_cz <- function(estimates, truth) {
   check_integer(truth, min = 0, max = 1, exp_length = length(estimates))
 
   # calculate threshold -----
-  roc <- create_roc(estimates = estimates, truth = truth)
+  roc <- roc_table(estimates = estimates, truth = truth)
 
-  cz <- roc |>
-    dplyr::mutate(cz = .data$sensitivity * .data$specificity) |>
-    dplyr::slice_max(order_by = .data$cz, n = 1, with_ties = FALSE) |>
-    dplyr::pull(".threshold")
-
-  cz
+  cz <- roc$sensitivity * roc$specificity
+  roc$.threshold[which.max(cz)]
 }
 
 
@@ -218,21 +203,11 @@ calc_iu <- function(estimates, truth) {
   check_integer(truth, min = 0, max = 1, exp_length = length(estimates))
 
   # calculate threshold -----
-  auc <- yardstick::roc_auc_vec(
-    truth = factor(truth),
-    estimate = estimates,
-    event_level = "second"
-  )
-  roc <- create_roc(estimates = estimates, truth = truth)
+  roc <- roc_table(estimates = estimates, truth = truth)
+  auc <- roc_table_auc(roc)
 
-  iu <- roc |>
-    dplyr::mutate(
-      iu = abs(.data$sensitivity - auc) + abs(.data$specificity - auc)
-    ) |>
-    dplyr::slice_min(order_by = .data$iu, n = 1, with_ties = FALSE) |>
-    dplyr::pull(".threshold")
-
-  iu
+  iu <- abs(roc$sensitivity - auc) + abs(roc$specificity - auc)
+  roc$.threshold[which.min(iu)]
 }
 
 
@@ -281,14 +256,10 @@ calc_gmean <- function(estimates, truth) {
   check_integer(truth, min = 0, max = 1, exp_length = length(estimates))
 
   # calculate threshold -----
-  roc <- create_roc(estimates = estimates, truth = truth)
+  roc <- roc_table(estimates = estimates, truth = truth)
 
-  g <- roc |>
-    dplyr::mutate(g = sqrt(.data$sensitivity * .data$specificity)) |>
-    dplyr::slice_max(order_by = .data$g, n = 1, with_ties = FALSE) |>
-    dplyr::pull(".threshold")
-
-  g
+  g <- sqrt(roc$sensitivity * roc$specificity)
+  roc$.threshold[which.max(g)]
 }
 
 #' Minimum p-value method
@@ -342,18 +313,14 @@ calc_minp <- function(estimates, truth) {
   check_integer(truth, min = 0, max = 1, exp_length = length(estimates))
 
   # calculate threshold -----
-  roc <- create_roc(estimates = estimates, truth = truth)
+  roc <- roc_table(estimates = estimates, truth = truth)
 
-  roc |>
-    dplyr::mutate(
-      minp = vapply(
-        .data$.threshold,
-        roc_chisq,
-        double(1),
-        estimates = estimates,
-        truth = truth
-      )
-    ) |>
-    dplyr::slice_max(order_by = .data$minp, n = 1, with_ties = FALSE) |>
-    dplyr::pull(".threshold")
+  # classifications use estimates strictly greater than the threshold
+  tpf <- roc$tp_gt / roc$n_pos
+  fpf <- roc$fp_gt / roc$n_neg
+  pct_pos <- ((roc$n_pos * tpf) + (roc$n_neg * fpf)) / (roc$n_pos + roc$n_neg)
+  chisq <- ((tpf - fpf)^2) /
+    (pct_pos * (1 - pct_pos) * ((1 / roc$n_pos) + (1 / roc$n_neg)))
+
+  roc$.threshold[which.max(chisq)]
 }

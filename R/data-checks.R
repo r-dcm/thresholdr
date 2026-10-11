@@ -54,6 +54,10 @@ check_double <- function(
   arg = rlang::caller_arg(x),
   call = rlang::caller_env()
 ) {
+  if (valid_numeric(x, whole = FALSE, ...)) {
+    return(check_length(x = x, exp_length = exp_length, arg = arg, call = call))
+  }
+
   for (i in seq_along(x)) {
     rlang::check_number_decimal(x[i], ..., arg = arg, call = call)
   }
@@ -74,6 +78,10 @@ check_integer <- function(
   arg = rlang::caller_arg(x),
   call = rlang::caller_env()
 ) {
+  if (valid_numeric(x, whole = TRUE, ...)) {
+    return(check_length(x = x, exp_length = exp_length, arg = arg, call = call))
+  }
+
   for (i in seq_along(x)) {
     rlang::check_number_whole(x[i], ..., arg = arg, call = call)
   }
@@ -82,6 +90,50 @@ check_integer <- function(
   }
 
   check_length(x = x, exp_length = exp_length, arg = arg, call = call)
+}
+
+
+#' Quickly determine whether a numeric vector is valid
+#'
+#' A vectorized fast path for `check_double()` and `check_integer()`. Returns
+#' `TRUE` only when every element of `x` would pass
+#' [rlang::check_number_decimal()] (or [rlang::check_number_whole()] when
+#' `whole = TRUE`). When `FALSE`, the element-wise checks should be run to
+#' produce the appropriate error message.
+#'
+#' @param x The input value to be checked.
+#' @param whole Whether values must be whole numbers.
+#' @param ... Other arguments passed to the rlang checks (ignored).
+#' @param min,max The minimum and maximum allowable values.
+#' @param allow_infinite Whether infinite values are allowed. Defaults match
+#'   [rlang::check_number_decimal()] and [rlang::check_number_whole()].
+#'
+#' @return A logical scalar.
+#' @noRd
+valid_numeric <- function(
+  x,
+  whole,
+  ...,
+  min = NULL,
+  max = NULL,
+  allow_infinite = !whole
+) {
+  if (!is.numeric(x) || is.object(x) || !length(x) || anyNA(x)) {
+    return(FALSE)
+  }
+  if (!allow_infinite && !all(is.finite(x))) {
+    return(FALSE)
+  }
+  if (whole && !all(x == trunc(x))) {
+    return(FALSE)
+  }
+  if (!is.null(min) && any(x < min)) {
+    return(FALSE)
+  }
+  if (!is.null(max) && any(x > max)) {
+    return(FALSE)
+  }
+  TRUE
 }
 
 

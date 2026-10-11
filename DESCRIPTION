@@ -36,6 +36,7 @@ Imports:
     yardstick
 Suggests: 
     CDM,
+    dcmdata,
     GDINA,
     knitr,
     measr,

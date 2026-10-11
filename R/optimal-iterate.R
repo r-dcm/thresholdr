@@ -150,15 +150,20 @@ optimal_iterate <- function(
         chain_id = chain_id,
         optimal_function = optimal_function,
         weight_function = weight_function,
-        converge_function = converge_function,
         iter_burnin = iter_burnin,
         iter_retain = iter_retain,
         ...
       )
     }
   ) |>
-    purrr::list_rbind() |>
-    dplyr::mutate(mean_thr = mean(.data$threshold))
+    purrr::list_rbind()
+
+  draws <- draws_tibble(estimates, chain$truth)
+  chain <- chain |>
+    dplyr::mutate(
+      conv = draw_criterion(draws, converge_function),
+      .draw = dplyr::row_number()
+    )
 
   # check for convergence -----
   diag_draws <- list(threshold = chain$threshold)
@@ -180,34 +185,17 @@ optimal_iterate <- function(
     purrr::list_rbind()
 
   # return results -----
-  results <- chain |>
-    dplyr::mutate(
-      results = purrr::map2(
-        .data$dat,
-        .data$mean_thr,
-        \(x, y, comp, metrics) {
-          probably::threshold_perf(
-            x,
-            truth = "truth",
-            estimate = "estimate",
-            thresholds = c(y, comp),
-            event_level = "second",
-            metrics = metrics
-          ) |>
-            dplyr::select(".threshold", ".metric", ".estimate") |>
-            tidyr::pivot_wider(
-              names_from = ".metric",
-              values_from = ".estimate"
-            )
-        },
-        comp = comp_thresholds,
-        metrics = metrics
-      )
+  results <- draw_performance(
+    draws,
+    thresholds = c(mean(chain$threshold), comp_thresholds),
+    metrics = metrics
+  ) |>
+    dplyr::left_join(
+      dplyr::select(chain, ".draw", "chain", "iteration", "conv"),
+      by = ".draw"
     ) |>
 
     # clean-up
-    dplyr::select(-"dat") |>
-    tidyr::unnest("results") |>
     dplyr::mutate(
       conv = dplyr::case_when(
         .data$.threshold %in% comp_thresholds ~ NA_real_,
@@ -219,7 +207,9 @@ optimal_iterate <- function(
       "chain",
       "iteration",
       !!additional_criterion,
-      ".threshold":dplyr::last_col(),
+      ".threshold",
+      dplyr::everything(),
+      -".draw",
       -dplyr::any_of("identity")
     ) |>
     dplyr::summarize(
@@ -260,11 +250,10 @@ optimal_iterate <- function(
 #' @param chain_id An integer identifying the chain.
 #' @param optimal_function The function used to calculate the optimal threshold.
 #' @param weight_function The function used to generate weighted "true" values.
-#' @param converge_function The function used to calculate the additional
-#'   convergence criterion.
 #'
 #' @return A [tibble][tibble::tibble-package] with one row per retained
-#'   iteration.
+#'   iteration, containing the generated "true" values (`truth`) and the
+#'   estimated optimal `threshold`.
 #' @noRd
 iterate_chain <- function(
   estimates,
@@ -272,16 +261,14 @@ iterate_chain <- function(
   chain_id,
   optimal_function,
   weight_function,
-  converge_function,
   iter_burnin,
   iter_retain,
   ...
 ) {
   iter_threshold <- init
 
-  dat <- vector(mode = "list", length = iter_retain)
+  tru <- vector(mode = "list", length = iter_retain)
   thr <- vector(mode = "double", length = iter_retain)
-  cnv <- vector(mode = "double", length = iter_retain)
   for (i in seq_len(iter_burnin + iter_retain)) {
     iter_truth <- weight_function(estimates, threshold = iter_threshold, ...)
     iter_threshold <- optimal_function(
@@ -294,23 +281,14 @@ iterate_chain <- function(
       next
     }
 
-    j <- i - iter_burnin
-    dat[[j]] <- estimate_tibble(estimates, iter_truth)
-    thr[j] <- iter_threshold
-    cnv[j] <- converge_function(
-      dat[[j]],
-      truth = "truth",
-      "estimate",
-      event_level = "second"
-    ) |>
-      dplyr::pull(".estimate")
+    tru[[i - iter_burnin]] <- iter_truth
+    thr[i - iter_burnin] <- iter_threshold
   }
 
   tibble::tibble(
     chain = chain_id,
     iteration = seq_len(iter_retain),
-    dat = dat,
-    threshold = thr,
-    conv = cnv
+    truth = tru,
+    threshold = thr
   )
 }

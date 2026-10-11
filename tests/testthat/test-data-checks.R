@@ -167,3 +167,20 @@ test_that("check_prob_metric", {
     c("prob_metric", "function")
   )
 })
+
+test_that("fast path for numeric checks", {
+  expect_true(valid_numeric(c(0, 0.5, 1), min = 0, max = 1, whole = FALSE))
+  expect_true(valid_numeric(c(Inf, 1), whole = FALSE))
+  expect_true(valid_numeric(c(0L, 1L), min = 0, max = 1, whole = TRUE))
+
+  expect_false(valid_numeric(c(0, 1.5), min = 0, max = 1, whole = FALSE))
+  expect_false(valid_numeric(c(-0.1, 1), min = 0, max = 1, whole = FALSE))
+  expect_false(valid_numeric(c(0.5, NA), whole = FALSE))
+  expect_false(valid_numeric(numeric(0), whole = FALSE))
+  expect_false(valid_numeric(NULL, whole = FALSE))
+  expect_false(valid_numeric("a", whole = FALSE))
+  expect_false(valid_numeric(c(Inf, 1), allow_infinite = FALSE, whole = FALSE))
+  expect_false(valid_numeric(c(Inf, 1), whole = TRUE))
+  expect_false(valid_numeric(c(0.5, 1), whole = TRUE))
+  expect_false(valid_numeric(factor(1:2), whole = TRUE))
+})
