@@ -62,6 +62,27 @@ muphi_to_shapes <- function(mu, phi) {
 }
 
 
+#' Find the Beta mean that corresponds to a given median
+#'
+#' @param median The desired median of the Beta distribution.
+#' @param phi The precision of the Beta distribution.
+#'
+#' @return The mean (&mu;) of the Beta distribution with precision `phi` and a
+#'   median of `median`.
+#' @noRd
+median_to_mu <- function(median, phi) {
+  if (median == 0.5) {
+    return(0.5)
+  }
+
+  stats::uniroot(
+    \(mu) stats::pbeta(median, mu * phi, (1 - mu) * phi) - 0.5,
+    interval = c(1e-8, 1 - 1e-8),
+    tol = 1e-10
+  )$root
+}
+
+
 #' Bound a variable between allowable values
 #'
 #' @param x A numeric value.
