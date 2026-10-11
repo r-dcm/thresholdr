@@ -77,6 +77,14 @@ estimates never need to be truncated to remain within [0, 1]. The new
 estimates are then used to generate truth values using \code{\link[=rbern]{rbern()}}. When the
 \code{threshold} is set to .5, this method is equivalent to unweighted
 generation.
+
+To ensure that the generated values can be used to calculate a receiver
+operating characteristic curve, all generation methods require that the
+generated truth values include both \code{0} and \code{1} values. If a set of
+generated values contains only \code{0} or only \code{1} values, the values are
+re-generated, up to 100 attempts. If valid values cannot be generated
+(e.g., if all \code{estimates} are 0), an error is returned. This requirement is
+not applied when \code{estimates} is of length 1.
 }
 \examples{
 generate_truth(runif(10))

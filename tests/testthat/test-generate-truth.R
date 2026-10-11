@@ -150,3 +150,32 @@ test_that("log-odds-weighted generation works", {
     c(0L, 1L, 0L, 1L)
   )
 })
+
+test_that("generated truth values include both 0 and 1", {
+  # without re-generation, about 1 in 3 draws would be all 0 or all 1
+  rare_one <- rep(0.05, 20)
+  rare_zero <- rep(0.95, 20)
+  gen_funcs <- list(
+    generate_truth,
+    generate_beta_wt_truth,
+    generate_distance_wt_truth,
+    generate_logodds_wt_truth
+  )
+
+  for (func in gen_funcs) {
+    for (i in 1:50) {
+      expect_setequal(func(rare_one), c(0L, 1L))
+      expect_setequal(func(rare_zero), c(0L, 1L))
+    }
+  }
+
+  # a single estimate can only produce one value
+  expect_length(generate_truth(0.5), 1L)
+
+  # impossible to generate both values
+  expect_snapshot(error = TRUE, generate_truth(rep(0, 10)))
+  expect_snapshot(
+    error = TRUE,
+    generate_logodds_wt_truth(rep(0, 10), threshold = 0.3)
+  )
+})

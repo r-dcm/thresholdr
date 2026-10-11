@@ -55,6 +55,14 @@
 #' `threshold` is set to .5, this method is equivalent to unweighted
 #' generation.
 #'
+#' To ensure that the generated values can be used to calculate a receiver
+#' operating characteristic curve, all generation methods require that the
+#' generated truth values include both `0` and `1` values. If a set of
+#' generated values contains only `0` or only `1` values, the values are
+#' re-generated, up to 100 attempts. If valid values cannot be generated
+#' (e.g., if all `estimates` are 0), an error is returned. This requirement is
+#' not applied when `estimates` is of length 1.
+#'
 #' @return An integer vector of `0` and `1`, the same length as `estimates`.
 #' @export
 #'
@@ -70,7 +78,8 @@
 #' generate_logodds_wt_truth(runif(10), threshold = 0.6)
 generate_truth <- function(estimates, ...) {
   check_double(estimates, min = 0, max = 1)
-  rbern(n = length(estimates), prob = estimates)
+
+  draw_mixed(\() rbern(n = length(estimates), prob = estimates))
 }
 
 #' @author W. Jake Thompson
@@ -89,14 +98,16 @@ generate_beta_wt_truth <- function(
   beta_mu <- median_to_mu(median = bound(threshold, 0, 1), phi = precision)
   beta_shapes <- muphi_to_shapes(mu = beta_mu, phi = precision)
 
-  as.integer(
-    estimates >
-      stats::rbeta(
-        n = length(estimates),
-        shape1 = beta_shapes$shape1,
-        shape2 = beta_shapes$shape2
-      )
-  )
+  draw_mixed(\() {
+    as.integer(
+      estimates >
+        stats::rbeta(
+          n = length(estimates),
+          shape1 = beta_shapes$shape1,
+          shape2 = beta_shapes$shape2
+        )
+    )
+  })
 }
 
 #' @author Jonathan A. Pedroza
@@ -106,12 +117,13 @@ generate_distance_wt_truth <- function(estimates, threshold = 0.5, ...) {
   check_double(estimates, min = 0, max = 1)
   rlang::check_number_decimal(threshold, min = 0, max = 1)
 
-  bound(
+  new_estimates <- bound(
     estimates - threshold + .5,
     lb = max(0 - threshold + 0.5, 0),
     ub = min(1 - threshold + 0.5, 1)
-  ) |>
-    generate_truth()
+  )
+
+  draw_mixed(\() rbern(n = length(new_estimates), prob = new_estimates))
 }
 
 #' @export
@@ -120,8 +132,9 @@ generate_logodds_wt_truth <- function(estimates, threshold = 0.5, ...) {
   check_double(estimates, min = 0, max = 1)
   rlang::check_number_decimal(threshold, min = 0, max = 1)
 
-  stats::plogis(
+  new_estimates <- stats::plogis(
     stats::qlogis(estimates) - stats::qlogis(bound(threshold, 0, 1))
-  ) |>
-    generate_truth()
+  )
+
+  draw_mixed(\() rbern(n = length(new_estimates), prob = new_estimates))
 }

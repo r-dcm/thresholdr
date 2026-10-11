@@ -98,3 +98,34 @@ median_to_mu <- function(median, phi) {
 bound <- function(x, lb, ub, buffer = 1e-5) {
   pmax(pmin(x, (ub - buffer)), (lb + buffer))
 }
+
+
+#' Generate truth values that include both 0 and 1 values
+#'
+#' @param draw A function with no arguments that returns a vector of `0` and
+#'   `1` integers.
+#' @param max_tries The maximum number of times to call `draw`.
+#' @param call The call stack for the error message.
+#'
+#' @return The first result of `draw()` that contains both `0` and `1` values.
+#'   If the result is of length 1, it is returned immediately.
+#' @noRd
+draw_mixed <- function(draw, max_tries = 100, call = rlang::caller_env()) {
+  for (i in seq_len(max_tries)) {
+    truth <- draw()
+    if (length(truth) < 2 || (any(truth == 0L) && any(truth == 1L))) {
+      return(truth)
+    }
+  }
+
+  cli::cli_abort(
+    c(
+      paste(
+        "Could not generate truth values containing both {.val {0}} and",
+        "{.val {1}} values after {max_tries} attempts."
+      ),
+      i = "Check whether all {.arg estimates} are close to 0 or 1."
+    ),
+    call = call
+  )
+}
