@@ -66,8 +66,7 @@ method(find_threshold, measrdcm) <- function(
       MARGIN = 2,
       FUN = method_func,
       optimal_method = optimal_method,
-      comp_thresholds = c(.5, .8),
-      metrics = metric_set(yardstick::ppv, yardstick::recall)
+      ...
     ) |>
     purrr::list_rbind(names_to = "attribute")
 }
