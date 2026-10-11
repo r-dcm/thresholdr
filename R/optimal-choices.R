@@ -36,7 +36,7 @@ get_optimal_function <- function(method) {
 #'   classifications.
 #' @noRd
 weighting_method_choices <- function() {
-  c("beta", "distance")
+  c("beta", "distance", "logodds")
 }
 
 
@@ -54,6 +54,7 @@ get_weighting_function <- function(method) {
     method,
     "beta" = generate_beta_wt_truth,
     "distance" = generate_distance_wt_truth,
+    "logodds" = generate_logodds_wt_truth,
     cli::cli_abort("No function found for {.arg method = \"{method}\"}")
   )
 }
