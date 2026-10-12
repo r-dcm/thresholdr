@@ -42,11 +42,12 @@ Suggests:
     GDINA,
     knitr,
     measr,
+    quarto,
     rmarkdown,
     spelling,
     testthat (>= 3.0.0)
 VignetteBuilder: 
-    knitr
+    quarto
 Remotes:
     RConsortium/S7
 Config/Needs/documentation: openpharma/roxylint

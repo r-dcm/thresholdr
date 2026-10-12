@@ -1,0 +1,18 @@
+---
+title: "Introduction to thresholdr"
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: '#>'
+description: |
+  An overview of 
+vignette: >
+  %\VignetteIndexEntry{Introduction to thresholdr}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r}
+#| label: setup
+library(thresholdr)
+```
