@@ -33,14 +33,22 @@ threshold is listed first, followed by any comparison thresholds.
 \code{find_threshold()} is an S7 generic that finds the optimal probability
 classification threshold for a set of probabilities or an estimated
 diagnostic classification model with one of the following classes:
-
 \itemize{
-\item \code{GDINA}
-\item \code{din}
-\item \code{double}
-\item \code{gdina}
-\item \code{gdm}
-\item \code{integer}
-\item \code{mcdina}
+\item \pkg{measr}
+\itemize{
+\item \code{measrdcm}: Models estimated with \code{\link[measr:dcm_estimate]{measr::dcm_estimate()}}.
+}
+\item \pkg{GDINA}
+\itemize{
+\item \code{GDINA}: Models estimated with \code{\link[GDINA:GDINA]{GDINA::GDINA()}}.
+}
+\item \pkg{CDM}
+\itemize{
+\item \code{din}: Models estimated with \code{\link[CDM:din]{CDM::din()}}.
+\item \code{gdina}: Models estimated with \code{\link[CDM:gdina]{CDM::gdina()}}.
+\item \code{gdm}: Models estimated with \code{\link[CDM:gdm]{CDM::gdm()}}. All skills must be
+dichotomous (e.g., \code{theta.k = c(0, 1)}).
+\item \code{mcdina}: Models estimated with \code{\link[CDM:mcdina]{CDM::mcdina()}}.
+}
 }
 }

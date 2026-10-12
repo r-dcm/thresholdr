@@ -5,7 +5,16 @@
 #' classification threshold for a set of probabilities or an estimated
 #' diagnostic classification model with one of the following classes:
 #'
-#' `r doclisting::methods_list("find_threshold")`
+#' * \pkg{measr}
+#'   * `measrdcm`: Models estimated with [measr::dcm_estimate()].
+#' * \pkg{GDINA}
+#'   * `GDINA`: Models estimated with [GDINA::GDINA()].
+#' * \pkg{CDM}
+#'   * `din`: Models estimated with [CDM::din()].
+#'   * `gdina`: Models estimated with [CDM::gdina()].
+#'   * `gdm`: Models estimated with [CDM::gdm()]. All skills must be
+#'     dichotomous (e.g., `theta.k = c(0, 1)`).
+#'   * `mcdina`: Models estimated with [CDM::mcdina()].
 #'
 #' @inheritParams optimal_resample
 #' @param x An object.
