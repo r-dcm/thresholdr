@@ -1,5 +1,6 @@
 Package: thresholdr
-Title: Estimate Optimal Probability Classification Thresholds for Diagnostic Models
+Title: Estimate Optimal Probability Classification Thresholds for
+    Diagnostic Models
 Version: 0.0.0.9000
 Authors@R: c(
     person("W. Jake", "Thompson", , "wjakethompson@gmail.com", role = c("aut", "cre"),
@@ -9,14 +10,15 @@ Authors@R: c(
            comment = "shapes_to_muphi() and muphi_to_shapes()"),
     person("University of Kansas", role = "cph")
   )
-Description: Diagnostic classification models are confirmatory latent class
-    models that provide probabilities of proficiency for respondents on each of
-    the assessed skills (Bradshaw, 2016 <doi:10.1002/9781118956588.ch13>).
-    Often, results based on these models are reported as classifications, using
-    0.5 as the probability threshold for classification (Bradshaw & Levy,
-    2019 <doi:10.1111/emip.12247>). Instead, we can use resampling methods to
-    estimate a different classification threshold that optimizes sensitivity
-    and specificity.
+Description: Diagnostic classification models are confirmatory latent
+    class models that provide probabilities of proficiency for respondents
+    on each of the assessed skills (Bradshaw, 2016
+    <doi:10.1002/9781118956588.ch13>).  Often, results based on these
+    models are reported as classifications, using 0.5 as the probability
+    threshold for classification (Bradshaw & Levy, 2019
+    <doi:10.1111/emip.12247>). Instead, we can use resampling methods to
+    estimate a different classification threshold that optimizes
+    sensitivity and specificity.
 License: MIT + file LICENSE
 URL: https://thresholdr.r-dcm.org, https://github.com/r-dcm/thresholdr
 BugReports: https://github.com/r-dcm/thresholdr/issues
@@ -43,16 +45,17 @@ Suggests:
     rmarkdown,
     spelling,
     testthat (>= 3.0.0)
-Remotes:
-    RConsortium/S7
 VignetteBuilder: 
     knitr
-Config/testthat/edition: 3
-Config/Needs/website: r-dcm/rdcmtemplate
+Remotes:
+    RConsortium/S7
 Config/Needs/documentation: openpharma/roxylint
-Config/roxylint: list(linters = roxylint::tidy)	
-Encoding: UTF-8
-LazyData: true
-Roxygen: list(markdown = TRUE, roclets = c("namespace", "rd", "roxylint::roxylint"))
-Language: en-US
+Config/Needs/website: r-dcm/rdcmtemplate
 Config/roxygen2/version: 8.1.1
+Config/roxylint: list(linters = roxylint::tidy)
+Config/testthat/edition: 3
+Encoding: UTF-8
+Language: en-US
+LazyData: true
+Roxygen: list(markdown = TRUE, roclets = c("namespace", "rd",
+    "roxylint::roxylint"))
