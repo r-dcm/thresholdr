@@ -108,11 +108,24 @@ method(find_threshold, new_S3_class("GDINA")) <- function(
   ...,
   approx_method = c("resample", "iterate"),
   optimal_method = "youden"
-) {}
+) {
+  method_func <- switch(
+    approx_method,
+    "resample" = optimal_resample,
+    "iterate" = optimal_iterate
+  )
+
+  cdm_attribute_probs(x, call = rlang::call2("find_threshold")) |>
+    apply(
+      MARGIN = 2,
+      FUN = method_func,
+      optimal_method = optimal_method,
+      ...
+    ) |>
+    purrr::list_rbind(names_to = "attribute")
+}
 
 method(find_threshold, new_S3_class("din")) <- .find_threshold_cdm
 method(find_threshold, new_S3_class("gdina")) <- .find_threshold_cdm
 method(find_threshold, new_S3_class("mcdina")) <- .find_threshold_cdm
-
-
 method(find_threshold, new_S3_class("gdm")) <- .find_threshold_cdm

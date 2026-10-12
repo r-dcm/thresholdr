@@ -144,3 +144,122 @@ test_that("GDINA method works", {
     expect_equal(att_thresholds[-1], c(.4, .7))
   }
 })
+
+test_that("CDM methods work", {
+  q_matrix <- CDM::sim.qmatrix
+  colnames(q_matrix) <- c("add", "sub", "mult")
+
+  din_model <- CDM::din(CDM::sim.dina, q.matrix = q_matrix, progress = FALSE)
+  gdina_model <- suppressWarnings(
+    CDM::gdina(CDM::sim.dina, q.matrix = q_matrix, progress = FALSE)
+  )
+  # mcdina() prints timing information even when `progress = FALSE`
+  utils::capture.output(
+    mcdina_model <- CDM::mcdina(
+      CDM::data.cdm01$data,
+      q.matrix = CDM::data.cdm01$q.matrix,
+      progress = FALSE
+    )
+  )
+
+  # defaults -------------------------------------------------------------------
+  for (model in list(din_model, gdina_model)) {
+    thld <- find_threshold(model, samples = 50, optimal_method = "iu")
+    expect_s3_class(thld, "tbl_df")
+    expect_equal(
+      colnames(thld),
+      c(
+        "attribute",
+        "threshold",
+        "sensitivity",
+        "specificity",
+        "j_index",
+        "distance"
+      )
+    )
+    expect_equal(thld$attribute, c("add", "sub", "mult"))
+    expect_type(thld$threshold, "double")
+    expect_true(all(thld$threshold >= 0 & thld$threshold <= 1))
+    expect_s3_class(thld$sensitivity, "rvar")
+    expect_s3_class(thld$specificity, "rvar")
+    expect_s3_class(thld$j_index, "rvar")
+    expect_s3_class(thld$distance, "rvar")
+    expect_equal(posterior::ndraws(thld$sensitivity), 50L)
+  }
+
+  # add comparison thresholds and new metrics ----------------------------------
+  thld <- suppressWarnings(
+    find_threshold(
+      mcdina_model,
+      approx_method = "iterate",
+      optimal_method = "gmean",
+      weighting_method = "distance",
+      chains = 2,
+      iter_burnin = 10,
+      iter_retain = 15,
+      comp_thresholds = c(.5, .8),
+      metrics = metric_set(yardstick::ppv, yardstick::recall)
+    )
+  )
+  expect_s3_class(thld, "tbl_df")
+  expect_equal(nrow(thld), 9L)
+  expect_equal(colnames(thld), c("attribute", "threshold", "ppv", "recall"))
+  expect_equal(thld$attribute, rep(c("A1", "A2", "A3"), each = 3))
+  expect_s3_class(thld$ppv, "rvar")
+  expect_equal(posterior::ndraws(thld$ppv), 30L)
+
+  for (att_thresholds in split(thld$threshold, thld$attribute)) {
+    expect_false(att_thresholds[1] %in% c(.5, .8))
+    expect_equal(att_thresholds[-1], c(.5, .8))
+  }
+})
+
+test_that("CDM gdm method works", {
+  # names are taken from the columns of `theta.k`
+  theta_k <- as.matrix(expand.grid(add = 0:1, sub = 0:1, mult = 0:1))
+  utils::capture.output(
+    gdm_model <- CDM::gdm(
+      CDM::sim.dina,
+      theta.k = theta_k,
+      Qmatrix = as.matrix(CDM::sim.qmatrix),
+      skillspace = "full",
+      progress = FALSE
+    )
+  )
+
+  gdm_probs <- cdm_attribute_probs(gdm_model)
+  expect_equal(dim(gdm_probs), c(nrow(CDM::sim.dina), 3L))
+  expect_equal(colnames(gdm_probs), c("add", "sub", "mult"))
+  expect_equal(
+    unname(gdm_probs),
+    unname(as.matrix(gdm_model$person[, paste0("EAP.", colnames(theta_k))]))
+  )
+
+  thld <- find_threshold(gdm_model, samples = 50)
+  expect_s3_class(thld, "tbl_df")
+  expect_equal(thld$attribute, c("add", "sub", "mult"))
+  expect_true(all(thld$threshold >= 0 & thld$threshold <= 1))
+  expect_equal(posterior::ndraws(thld$sensitivity), 50L)
+
+  # default skill names
+  utils::capture.output(
+    gdm_model <- CDM::gdm(
+      CDM::sim.dina,
+      theta.k = c(0, 1),
+      Qmatrix = as.matrix(CDM::sim.qmatrix),
+      progress = FALSE
+    )
+  )
+  expect_equal(colnames(cdm_attribute_probs(gdm_model)), c("F1", "F2", "F3"))
+
+  # only binary skills are supported
+  utils::capture.output(
+    gdm_poly <- CDM::gdm(
+      CDM::sim.dina,
+      theta.k = c(0, 1, 2),
+      Qmatrix = as.matrix(CDM::sim.qmatrix),
+      progress = FALSE
+    )
+  )
+  expect_snapshot(error = TRUE, find_threshold(gdm_poly))
+})
