@@ -59,6 +59,12 @@ test_that("measrdcm method works", {
   expect_type(thld$threshold, "double")
   expect_s3_class(thld$ppv, "rvar")
   expect_s3_class(thld$recall, "rvar")
+
+  # for each attribute: estimated threshold first, then comparison thresholds
+  for (att_thresholds in split(thld$threshold, thld$attribute)) {
+    expect_false(att_thresholds[1] %in% c(.5, .8))
+    expect_equal(att_thresholds[-1], c(.5, .8))
+  }
 })
 
 test_that("GDINA method works", {

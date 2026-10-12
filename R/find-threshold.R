@@ -15,7 +15,8 @@
 #'   which will use [optimal_resample()] or `"iterate"`, which will use
 #'   [optimal_iterate()].
 #' @returns A [tibble][tibble::tibble-package] with one row per threshold and
-#'   (if applicable) per attribute.
+#'   (if applicable) per attribute. For each attribute, the estimated optimal
+#'   threshold is listed first, followed by any comparison thresholds.
 #' @export
 find_threshold <- new_generic(
   "find_threshold",

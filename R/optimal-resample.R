@@ -51,7 +51,8 @@
 #' `metrics`.
 #'
 #' @return A [tibble][tibble::tibble-package] with 1 row per threshold. The
-#' columns are:
+#' first row is the averaged optimal threshold, followed by any
+#' `comp_thresholds` in the order they were specified. The columns are:
 #'   * `threshold`: The averaged optimal threshold and any specified
 #'     `comp_thresholds`.
 #'   * If `weight_by` was specified, an [rvar][posterior::rvar()] containing the
@@ -108,9 +109,10 @@ optimal_resample <- function(
   wt_threshold <- stats::weighted.mean(thresholds, weight)
 
   # calculate performance -----
+  eval_thresholds <- c(wt_threshold, comp_thresholds)
   draw_performance(
     draws,
-    thresholds = c(wt_threshold, comp_thresholds),
+    thresholds = eval_thresholds,
     metrics = metrics
   ) |>
     dplyr::mutate(
@@ -133,6 +135,7 @@ optimal_resample <- function(
       .threshold = posterior::E(.data$.threshold),
       .by = ".threshold"
     ) |>
+    dplyr::arrange(match(.data$.threshold, eval_thresholds)) |>
     dplyr::relocate(".threshold", .before = 1) |>
     dplyr::rename(threshold = ".threshold")
 }

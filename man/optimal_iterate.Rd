@@ -54,7 +54,8 @@ probabilities. A set of default metrics is used when \code{NULL} (see
 }
 \value{
 A \link[tibble:tibble-package]{tibble} with 1 row per threshold. The
-columns are:
+first row is the optimal threshold, followed by any \code{comp_thresholds} in the
+order they were specified. The columns are:
 \itemize{
 \item \code{threshold}: The optimal threshold and any specified \code{comp_thresholds}.
 \item If \code{additional_criterion} was specified, an \link[posterior:rvar]{rvar}

@@ -70,7 +70,8 @@
 #' are provided by default, specify new `metrics`.
 #'
 #' @return A [tibble][tibble::tibble-package] with 1 row per threshold. The
-#' columns are:
+#' first row is the optimal threshold, followed by any `comp_thresholds` in the
+#' order they were specified. The columns are:
 #'   * `threshold`: The optimal threshold and any specified `comp_thresholds`.
 #'   * If `additional_criterion` was specified, an [rvar][posterior::rvar()]
 #'     containing the distribution of class probability metrics across all
@@ -185,9 +186,10 @@ optimal_iterate <- function(
     purrr::list_rbind()
 
   # return results -----
+  eval_thresholds <- c(mean(chain$threshold), comp_thresholds)
   results <- draw_performance(
     draws,
-    thresholds = c(mean(chain$threshold), comp_thresholds),
+    thresholds = eval_thresholds,
     metrics = metrics
   ) |>
     dplyr::left_join(
@@ -220,6 +222,7 @@ optimal_iterate <- function(
       .threshold = posterior::E(.data$.threshold),
       .by = ".threshold"
     ) |>
+    dplyr::arrange(match(.data$.threshold, eval_thresholds)) |>
     dplyr::relocate(".threshold", .before = 1) |>
     dplyr::rename(threshold = ".threshold")
 

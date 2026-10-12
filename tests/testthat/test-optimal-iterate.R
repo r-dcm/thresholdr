@@ -226,3 +226,21 @@ test_that("chains and diagnostics work", {
   expect_equal(posterior::ndraws(it_single$sensitivity), 40L)
   expect_equal(attr(it_single, "diagnostics")$parameter, "threshold")
 })
+
+test_that("optimal threshold is first, then comparison thresholds", {
+  it_youden <- suppressWarnings(
+    optimal_iterate(
+      estimates = dcm_probs$att1$estimate,
+      optimal_method = "youden",
+      weighting_method = "distance",
+      chains = 2,
+      iter_burnin = 10,
+      iter_retain = 10,
+      comp_thresholds = c(0.8, 0.05, 0.5)
+    )
+  )
+
+  expect_equal(nrow(it_youden), 4L)
+  expect_false(it_youden$threshold[1] %in% c(0.8, 0.05, 0.5))
+  expect_equal(it_youden$threshold[-1], c(0.8, 0.05, 0.5))
+})

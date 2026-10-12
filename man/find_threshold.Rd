@@ -26,7 +26,8 @@ which will use \code{\link[=optimal_resample]{optimal_resample()}} or \code{"ite
 }
 \value{
 A \link[tibble:tibble-package]{tibble} with one row per threshold and
-(if applicable) per attribute.
+(if applicable) per attribute. For each attribute, the estimated optimal
+threshold is listed first, followed by any comparison thresholds.
 }
 \description{
 \code{find_threshold()} is an S7 generic that finds the optimal probability

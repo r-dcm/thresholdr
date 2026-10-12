@@ -181,3 +181,16 @@ test_that("comparison thresholds work", {
     c(0, 0, 0)
   )
 })
+
+test_that("optimal threshold is first, then comparison thresholds", {
+  rs_youden <- optimal_resample(
+    estimates = dcm_probs$att1$estimate,
+    optimal_method = "youden",
+    samples = 20,
+    comp_thresholds = c(0.8, 0.05, 0.5)
+  )
+
+  expect_equal(nrow(rs_youden), 4L)
+  expect_false(rs_youden$threshold[1] %in% c(0.8, 0.05, 0.5))
+  expect_equal(rs_youden$threshold[-1], c(0.8, 0.05, 0.5))
+})
