@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# thresholdr
+# thresholdr <a href="https://thresholdr.r-dcm.org"><img src="man/figures/logo.png" align="right" height="138" alt="thresholdr website" /></a>
 
 <!-- badges: start -->
 
@@ -38,8 +38,7 @@ threshold using `calc_youden()`:
 ``` r
 library(thresholdr)
 
-calc_youden(estimates = dcm_probs$att1$estimate,
-            truth = dcm_probs$att1$truth)
+calc_youden(estimates = dcm_probs$att1$estimate, truth = dcm_probs$att1$truth)
 #> [1] 0.3170266
 ```
 
@@ -49,10 +48,10 @@ using, for example, resampling:
 
 ``` r
 optimal_resample(estimates = dcm_probs$att1$estimate, optimal_method = "youden")
-#> # A tibble: 1 × 4
-#>   .threshold  sensitivity   specificity      j_index
-#>        <dbl>   <rvar[1d]>    <rvar[1d]>   <rvar[1d]>
-#> 1      0.381  0.89 ± 0.02  0.91 ± 0.012  0.8 ± 0.025
+#> # A tibble: 1 × 5
+#>   threshold   sensitivity   specificity      j_index        distance
+#>       <dbl>    <rvar[1d]>    <rvar[1d]>   <rvar[1d]>      <rvar[1d]>
+#> 1     0.375  0.89 ± 0.021  0.91 ± 0.012  0.8 ± 0.026  0.021 ± 0.0055
 ```
 
 This results in a threshold that is similar, although slightly higher,
@@ -61,4 +60,4 @@ visualize our estimate on an ROC curve. Here again we see that our
 estimated optimal threshold from the resamples are very close to the
 true value.
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-3-1.png" alt="" width="100%" />

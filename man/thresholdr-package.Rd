@@ -11,7 +11,7 @@ Diagnostic classification models are confirmatory latent class models that provi
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://thresholdr.measr.info}
+  \item \url{https://thresholdr.r-dcm.org}
   \item \url{https://github.com/r-dcm/thresholdr}
   \item Report bugs at \url{https://github.com/r-dcm/thresholdr/issues}
 }

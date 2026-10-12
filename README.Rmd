@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 options(tidyverse.quiet = TRUE)
 ```
 
-# thresholdr
+# thresholdr <a href="https://thresholdr.r-dcm.org"><img src="man/figures/logo.png" align="right" height="138" alt="thresholdr website" /></a>
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
@@ -43,8 +43,7 @@ For example, using simulated data where the true attribute classifications are k
 ```{r example}
 library(thresholdr)
 
-calc_youden(estimates = dcm_probs$att1$estimate,
-            truth = dcm_probs$att1$truth)
+calc_youden(estimates = dcm_probs$att1$estimate, truth = dcm_probs$att1$truth)
 ```
 
 However, in practice the true attribute classifications are unknown. In this scenario, we can estimate what the optimal threshold should be using, for example, resampling:
@@ -57,27 +56,31 @@ This results in a threshold that is similar, although slightly higher, than what
 We can also visualize our estimate on an ROC curve.
 Here again we see that our estimated optimal threshold from the resamples are very close to the true value.
 
-```{r echo = FALSE, message = FALSE}
+```{r echo = FALSE, message = FALSE, dev = "ragg_png"}
 library(tidyverse)
 library(posterior)
 
-yd_op <- calc_youden(estimates = dcm_probs$att1$estimate,
-                     truth = dcm_probs$att1$truth)
-yd_rs <- optimal_resample(estimates = dcm_probs$att1$estimate,
-                          optimal_method = "youden")
+yd_op <- calc_youden(
+  estimates = dcm_probs$att1$estimate,
+  truth = dcm_probs$att1$truth
+)
+yd_rs <- optimal_resample(
+  estimates = dcm_probs$att1$estimate,
+  optimal_method = "youden"
+)
 
-create_roc(estimates = dcm_probs$att1$estimate,
-           truth = dcm_probs$att1$truth) |> 
+create_roc(estimates = dcm_probs$att1$estimate, truth = dcm_probs$att1$truth) |>
   ggplot(aes(x = 1 - specificity, y = sensitivity)) +
   geom_path() +
-  geom_point(data = ~filter(.x, .threshold == yd_op),
-             aes(x = 1 - specificity, y = sensitivity,
-                 color = "Youden's J")) +
-  geom_point(data = yd_rs,
-             aes(x = 1 - E(specificity), y = E(sensitivity),
-                 color = "Resample Estimate")) +
+  geom_point(
+    data = ~ filter(.x, .threshold == yd_op),
+    aes(x = 1 - specificity, y = sensitivity, color = "Youden's J")
+  ) +
+  geom_point(
+    data = yd_rs,
+    aes(x = 1 - E(specificity), y = E(sensitivity), color = "Resample Estimate")
+  ) +
   geom_abline(lty = 3) +
   coord_equal() +
   theme_bw()
 ```
-
