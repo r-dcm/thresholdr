@@ -18,7 +18,7 @@ Description: Diagnostic classification models are confirmatory latent class
     estimate a different classification threshold that optimizes sensitivity
     and specificity.
 License: MIT + file LICENSE
-URL: https://thresholdr.measr.info, https://github.com/r-dcm/thresholdr
+URL: https://thresholdr.r-dcm.org, https://github.com/r-dcm/thresholdr
 BugReports: https://github.com/r-dcm/thresholdr/issues
 Depends: 
     R (>= 4.1.0)

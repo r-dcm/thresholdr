@@ -4,5 +4,27 @@ template:
   package: rdcmtemplate
   bootstrap: 5
 
-development:
-  mode: auto
+reference:
+- title: ~
+  contents:
+  - find_threshold
+
+- title: Approximation methods
+  contents:
+  - optimal_resample
+  - optimal_iterate
+
+- title: Optimal cut-point methods
+  contents:
+  - starts_with("calc_")
+
+- title: Miscellaneous helpers
+  contents:
+  - generate_truth
+  - rbern
+  - shapes_to_muphi
+  - create_roc
+
+- title: Example data
+  contents:
+  - dcm_probs
