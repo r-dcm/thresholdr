@@ -85,7 +85,14 @@ method(find_threshold, new_S3_class("GDINA")) <- function(
     "iterate" = optimal_iterate
   )
 
+  att_names <- if (is.null(colnames(x$options$Q))) {
+    paste0("A", seq_len(ncol(x$options$Q)))
+  } else {
+    colnames(x$options$Q)
+  }
+
   GDINA::personparm(x, what = "mp") |>
+    tibble::as_tibble(.name_repair = ~att_names) |>
     apply(
       MARGIN = 2,
       FUN = method_func,
