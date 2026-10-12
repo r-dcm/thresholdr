@@ -92,7 +92,7 @@ method(find_threshold, new_S3_class("GDINA")) <- function(
   }
 
   GDINA::personparm(x, what = "mp") |>
-    tibble::as_tibble(.name_repair = ~att_names) |>
+    tibble::as_tibble(.name_repair = \(x) att_names) |>
     apply(
       MARGIN = 2,
       FUN = method_func,

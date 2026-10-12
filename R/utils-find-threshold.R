@@ -15,17 +15,15 @@ cdm_attribute_probs <- function(x, call = rlang::caller_env()) {
     # columns of `theta.k` (F1, F2, ..., unless a named matrix was supplied)
     theta <- as.matrix(x$theta.k)
     n_levels <- apply(theta, 2, \(lv) length(unique(lv)))
-    if (any(n_levels != 2)) {
-      bad_skills <- paste0(
-        colnames(theta)[n_levels != 2],
-        " (",
-        n_levels[n_levels != 2],
-        " levels)"
-      )
+    bad_skills <- n_levels[n_levels != 2]
+    if (length(bad_skills) > 0) {
       cli::cli_abort(
         c(
           "All skills in a {.cls gdm} model must have exactly two levels.",
-          x = "Skills without two levels: {bad_skills}.",
+          x = paste(
+            "Skills without two levels:",
+            "{paste0(names(bad_skills), ' (', bad_skills, ' levels)')}."
+          ),
           i = "Estimate the model with {.code theta.k = c(0, 1)}."
         ),
         call = call
