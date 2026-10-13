@@ -6,6 +6,8 @@
 \alias{thresholdr-package}
 \title{thresholdr: Estimate Optimal Probability Classification Thresholds for Diagnostic Models}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 Diagnostic classification models are confirmatory latent class models that provide probabilities of proficiency for respondents on each of the assessed skills (Bradshaw, 2016 \doi{10.1002/9781118956588.ch13}). Often, results based on these models are reported as classifications, using 0.5 as the probability threshold for classification (Bradshaw & Levy, 2019 \doi{10.1111/emip.12247}). Instead, we can use resampling methods to estimate a different classification threshold that optimizes sensitivity and specificity.
 }
 \seealso{

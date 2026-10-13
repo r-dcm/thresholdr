@@ -47,8 +47,9 @@ Suggests:
     quarto,
     rmarkdown,
     spelling,
-    testthat (>= 3.0.0)
-VignetteBuilder: 
+    testthat (>= 3.0.0),
+    withr
+VignetteBuilder:
     quarto
 Remotes:
     RConsortium/S7

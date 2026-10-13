@@ -5,6 +5,8 @@
 #' classification threshold for a set of probabilities or an estimated
 #' diagnostic classification model with one of the following classes:
 #'
+#' * `numeric`: A vector of probabilities (e.g., the probabilities of
+#'   proficiency on a single attribute).
 #' * \pkg{measr}
 #'   * `measrdcm`: Models estimated with [measr::dcm_estimate()].
 #' * \pkg{GDINA}
@@ -17,7 +19,7 @@
 #'   * `mcdina`: Models estimated with [CDM::mcdina()].
 #'
 #' @inheritParams optimal_resample
-#' @param x An object.
+#' @param x A numeric vector of probabilities or an estimated model object.
 #' @param ... Additional arguments passed to the approximation function defined
 #'   by `approx_method`.
 #' @param approx_method The approximation method to use. One of `"resample"`,
@@ -25,7 +27,9 @@
 #'   [optimal_iterate()].
 #' @returns A [tibble][tibble::tibble-package] with one row per threshold and
 #'   (if applicable) per attribute. For each attribute, the estimated optimal
-#'   threshold is listed first, followed by any comparison thresholds.
+#'   threshold is listed first, followed by any comparison thresholds. For a
+#'   numeric vector, the result is the same as calling [optimal_resample()] or
+#'   [optimal_iterate()] directly, and there is no `attribute` column.
 #' @export
 find_threshold <- new_generic(
   "find_threshold",
@@ -52,7 +56,17 @@ method(find_threshold, class_numeric) <- function(
   ...,
   approx_method = c("resample", "iterate"),
   optimal_method = "youden"
-) {}
+) {
+  check_double(x, min = 0, max = 1, call = rlang::call2("find_threshold"))
+
+  method_func <- switch(
+    approx_method,
+    "resample" = optimal_resample,
+    "iterate" = optimal_iterate
+  )
+
+  method_func(estimates = x, optimal_method = optimal_method, ...)
+}
 
 ## measr -----------------------------------------------------------------------
 measrdcm <- new_external_class("measr", "measrdcm")

@@ -1,3 +1,26 @@
+# numeric method checks inputs
+
+    Code
+      find_threshold(c(0.2, 1.4, 0.7))
+    Condition
+      Error in `find_threshold()`:
+      ! `x` must be a number between 0 and 1, not the number 1.4.
+    Code
+      find_threshold(c(0.2, NA, 0.7))
+    Condition
+      Error in `find_threshold()`:
+      ! `x` must be a number, not a numeric `NA`.
+    Code
+      find_threshold(c(0.2, 0.7), approx_method = "bootstrap")
+    Condition
+      Error in `find_threshold()`:
+      ! `approx_method` must be one of "resample" or "iterate", not "bootstrap".
+    Code
+      find_threshold(c(0.2, 0.7), optimal_method = "accuracy")
+    Condition
+      Error in `find_threshold()`:
+      ! `optimal_method` must be one of "youden", "topleft", "cz", "gmean", "iu", or "minp", not "accuracy".
+
 # CDM gdm method works
 
     Code

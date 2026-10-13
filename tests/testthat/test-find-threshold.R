@@ -1,3 +1,97 @@
+test_that("numeric method works", {
+  est <- dcm_probs$att1$estimate
+
+  # defaults -------------------------------------------------------------------
+  thld <- find_threshold(est, samples = 100)
+  expect_s3_class(thld, "tbl_df")
+  expect_equal(nrow(thld), 1L)
+  expect_equal(
+    colnames(thld),
+    c("threshold", "sensitivity", "specificity", "j_index", "distance")
+  )
+  expect_type(thld$threshold, "double")
+  expect_true(thld$threshold >= 0 && thld$threshold <= 1)
+  expect_s3_class(thld$sensitivity, "rvar")
+  expect_s3_class(thld$specificity, "rvar")
+  expect_s3_class(thld$j_index, "rvar")
+  expect_s3_class(thld$distance, "rvar")
+  expect_equal(posterior::ndraws(thld$sensitivity), 100L)
+
+  # add comparison thresholds and new metrics ----------------------------------
+  thld <- suppressWarnings(find_threshold(
+    est,
+    approx_method = "iterate",
+    optimal_method = "cz",
+    chains = 2,
+    iter_burnin = 10,
+    iter_retain = 15,
+    comp_thresholds = c(.5, .8),
+    metrics = metric_set(yardstick::ppv, yardstick::recall)
+  ))
+  expect_s3_class(thld, "tbl_df")
+  expect_equal(nrow(thld), 3L)
+  expect_equal(colnames(thld), c("threshold", "ppv", "recall"))
+  expect_false(thld$threshold[1] %in% c(.5, .8))
+  expect_equal(thld$threshold[-1], c(.5, .8))
+  expect_s3_class(thld$ppv, "rvar")
+  expect_s3_class(thld$recall, "rvar")
+  expect_equal(posterior::ndraws(thld$ppv), 30L)
+
+  # iteration diagnostics are retained
+  expect_type(attr(thld, "converged"), "logical")
+  expect_s3_class(attr(thld, "diagnostics"), "tbl_df")
+})
+
+test_that("numeric method matches the approximation functions", {
+  est <- dcm_probs$att2$estimate
+
+  withr::local_seed(1213)
+  generic <- find_threshold(
+    est,
+    optimal_method = "gmean",
+    samples = 50,
+    comp_thresholds = .5
+  )
+  withr::local_seed(1213)
+  direct <- optimal_resample(
+    est,
+    optimal_method = "gmean",
+    samples = 50,
+    comp_thresholds = .5
+  )
+  expect_identical(generic, direct)
+
+  withr::local_seed(1213)
+  generic <- suppressWarnings(find_threshold(
+    est,
+    approx_method = "iterate",
+    optimal_method = "topleft",
+    weighting_method = "logodds",
+    chains = 2,
+    iter_burnin = 10,
+    iter_retain = 15
+  ))
+  withr::local_seed(1213)
+  direct <- suppressWarnings(optimal_iterate(
+    est,
+    optimal_method = "topleft",
+    weighting_method = "logodds",
+    chains = 2,
+    iter_burnin = 10,
+    iter_retain = 15
+  ))
+  expect_identical(generic, direct)
+})
+
+test_that("numeric method checks inputs", {
+  expect_snapshot(error = TRUE, {
+    find_threshold(c(0.2, 1.4, 0.7))
+    find_threshold(c(0.2, NA, 0.7))
+    find_threshold(c(0.2, 0.7), approx_method = "bootstrap")
+    find_threshold(c(0.2, 0.7), optimal_method = "accuracy")
+  })
+})
+
 test_that("measrdcm method works", {
   model_spec <- measr::dcm_specify(
     qmatrix = dcmdata::pie_ft_qmatrix,

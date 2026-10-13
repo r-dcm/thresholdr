@@ -12,7 +12,7 @@ find_threshold(
 )
 }
 \arguments{
-\item{x}{An object.}
+\item{x}{A numeric vector of probabilities or an estimated model object.}
 
 \item{...}{Additional arguments passed to the approximation function defined
 by \code{approx_method}.}
@@ -27,13 +27,17 @@ which will use \code{\link[=optimal_resample]{optimal_resample()}} or \code{"ite
 \value{
 A \link[tibble:tibble-package]{tibble} with one row per threshold and
 (if applicable) per attribute. For each attribute, the estimated optimal
-threshold is listed first, followed by any comparison thresholds.
+threshold is listed first, followed by any comparison thresholds. For a
+numeric vector, the result is the same as calling \code{\link[=optimal_resample]{optimal_resample()}} or
+\code{\link[=optimal_iterate]{optimal_iterate()}} directly, and there is no \code{attribute} column.
 }
 \description{
 \code{find_threshold()} is an S7 generic that finds the optimal probability
 classification threshold for a set of probabilities or an estimated
 diagnostic classification model with one of the following classes:
 \itemize{
+\item \code{numeric}: A vector of probabilities (e.g., the probabilities of
+proficiency on a single attribute).
 \item \pkg{measr}
 \itemize{
 \item \code{measrdcm}: Models estimated with \code{\link[measr:dcm_estimate]{measr::dcm_estimate()}}.
