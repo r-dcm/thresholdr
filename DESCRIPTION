@@ -40,6 +40,8 @@ Suggests:
     CDM,
     dcmdata,
     GDINA,
+    ggplot2,
+    here,
     knitr,
     measr,
     quarto,

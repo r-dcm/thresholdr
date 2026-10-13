@@ -1,8 +1,13 @@
 Antolini
 Biometrics
 Bürkner
+CDM
 CMD
 Codecov
+DCM
+DCMs
+DTMR
+GDINA
 Gelman
 IU
 Kubat
@@ -24,6 +29,7 @@ Youden’s
 al
 biomarkers
 cz
+dcmdata
 doi
 emip
 et
@@ -36,8 +42,10 @@ muphi
 parametrize
 rvar
 topleft
+widehat
 youden
 α
 β
 μ
 φ
+χ

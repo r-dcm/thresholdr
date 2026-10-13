@@ -5,7 +5,12 @@ knitr:
     collapse: true
     comment: '#>'
 description: |
-  An overview of 
+  An overview of thresholdr: why the conventional 0.5 classification threshold
+  may not be optimal, and how to estimate a better one from a diagnostic
+  classification model.
+bibliography: bib/references.bib
+csl: bib/apa.csl
+link-citations: true
 vignette: >
   %\VignetteIndexEntry{Introduction to thresholdr}
   %\VignetteEngine{quarto::html}
@@ -14,5 +19,375 @@ vignette: >
 
 ```{r}
 #| label: setup
+#| include: false
+
 library(thresholdr)
+library(measr)
+library(dcmdata)
+library(dplyr)
+library(ggplot2)
+library(posterior)
+library(purrr)
 ```
+
+Diagnostic classification models (DCMs) are confirmatory latent class models that estimate, for each respondent, the probability that they are proficient on each of a set of assessed skills, or attributes [@bradshaw-dcm].
+These probabilities are rich, but they are rarely what gets reported.
+Instead, results are usually summarized as classifications (e.g., proficient or not proficient), and the most common way to create those classifications is to label any respondent with a probability of proficiency above 0.5 as *proficient* [@bradshaw-2019].
+
+A threshold of 0.5 is intuitive, but nothing guarantees that it is the best choice.
+Depending on the attribute, a different threshold may do a better job of balancing the two kinds of errors we can make: classifying a non-proficient respondent as proficient (a false positive) and classifying a proficient respondent as not proficient (a false negative).
+The goal of thresholdr is to estimate an optimal probability classification threshold for each attribute.
+
+## An example model
+
+To see how this works in practice, we'll use the Diagnosing Teachers' Multiplicative Reasoning (DTMR) data from the `{dcmdata}` package.
+These data were simulated to mirror the DTMR assessment [@dtmr], which measures four attributes with 27 items.
+Because the data are simulated, dcmdata also includes the true attribute profiles for each respondent, which means we can check how close our estimated thresholds come to the true optimal thresholds.
+
+```{r}
+#| label: dtmr-data
+
+library(dcmdata)
+dtmr_data
+
+dtmr_qmatrix
+```
+
+### Estimating the model
+
+We'll estimate a loglinear cognitive diagnostic model [LCDM\; @lcdm] using [measr](https://measr.r-dcm.org) [@measr].
+For speed, we use `method = "optim"`, which uses Stan's optimizer to find point estimates of the model parameters.
+
+```{r}
+#| label: estimate-model-hide
+#| include: false
+
+dtmr_spec <- dcm_specify(
+  dtmr_qmatrix,
+  identifier = "item",
+  measurement_model = lcdm(),
+  structural_model = unconstrained()
+)
+
+dtmr_lcdm <- dcm_estimate(
+  dtmr_spec,
+  data = dtmr_data,
+  identifier = "id",
+  method = "optim",
+  seed = 1213,
+  file = here::here("vignettes", "fits", "dtmr-lcdm")
+)
+
+dtmr_lcdm <- add_respondent_estimates(dtmr_lcdm)
+```
+
+```{r}
+#| label: estimate-model-show
+#| eval: false
+
+library(measr)
+
+dtmr_spec <- dcm_specify(
+  dtmr_qmatrix,
+  identifier = "item",
+  measurement_model = lcdm(),
+  structural_model = unconstrained()
+)
+
+dtmr_lcdm <- dcm_estimate(
+  dtmr_spec,
+  data = dtmr_data,
+  identifier = "id",
+  method = "optim",
+  seed = 1213
+)
+```
+
+We can then extract the estimated proficiency probabilities for each respondent with `measr_extract()`.
+
+```{r}
+#| label: attribute-probs
+
+dtmr_probs <- measr_extract(dtmr_lcdm, "attribute_prob")
+dtmr_probs
+```
+
+## Finding an optimal threshold when the truth is known
+
+If we knew every respondent's true proficiency status, choosing a threshold would be a familiar problem.
+For every possible threshold, we can calculate the sensitivity (the proportion of truly proficient respondents classified as proficient) and specificity (the proportion of truly non-proficient respondents classified as not proficient).
+Plotting these values for all possible thresholds gives a receiver operating characteristic (ROC) curve, and there are many established criteria for selecting the "best" point on that curve.
+
+Because the DTMR data is simulated, we know the true proficiency status for each respondent on each attribute (`dtmr_true_profiles`).
+Using these data, we can calculate the optimal threshold for the `referent_units` attribute using Youden's J statistic [@youden], which selects the threshold that maximizes `sensitivity + specificity − 1`.
+
+```{r}
+#| label: calc-youden
+
+library(thresholdr)
+library(dplyr)
+
+comparison_data <-
+  left_join(
+    select(dtmr_probs, id, estimate = referent_units),
+    select(dcmdata::dtmr_true_profiles, id, truth = referent_units),
+    by = "id"
+  )
+comparison_data
+
+calc_youden(
+  estimates = comparison_data$estimate,
+  truth = comparison_data$truth
+)
+```
+
+```{r}
+#| label: save-youden
+#| include: false
+
+youden <- calc_youden(
+  estimates = comparison_data$estimate,
+  truth = comparison_data$truth
+)
+```
+
+In this example, the optimal classification threshold is `r round(youden, digits = 3)`.
+thresholdr currently supports six criteria, each available as a `calc_*()` function.
+Different criteria can disagree [@topleft], so it is important to consider what you want to optimize for when choosing a criterion.
+
+```{r}
+#| label: calc-comparison
+
+comparison_data |>
+  summarize(
+    cz = calc_cz(estimate, truth),
+    gmean = calc_gmean(estimate, truth),
+    iu = calc_iu(estimate, truth),
+    minp = calc_minp(estimate, truth),
+    topleft = calc_topleft(estimate, truth),
+    youden = calc_youden(estimate, truth)
+  )
+```
+
+| Function         | Method                         | `optimal_method` | Criterion                                                     |
+|:-----------------|:-------------------------------|:-----------------|:--------------------------------------------------------------|
+| `calc_cz()`      | Concordance probability [@cz]  | `"cz"`           | Maximize sensitivity × specificity                            |
+| `calc_gmean()`   | G-mean [@gmean]                | `"gmean"`        | Maximize √(sensitivity × specificity)                         |
+| `calc_iu()`      | Index of union [@iu]           | `"iu"`           | Minimize distance of sensitivity and specificity from the AUC |
+| `calc_minp()`    | Minimum p-value [@minp]        | `"minp"`         | Maximize the χ² association between true and predicted status |
+| `calc_topleft()` | Closest to top-left [@topleft] | `"topleft"`      | Minimize distance to perfect classification                   |
+| `calc_youden()`  | Youden's J statistic [@youden] | `"youden"`       | Maximize sensitivity + specificity − 1                        |
+
+: Optimal threshold methods available in thresholdr. {#tbl-methods}
+
+## Estimating an optimal threshold when the truth is unknown
+
+In practice, of course, we never know respondents' true proficiency status.
+All we have are the estimated probabilities of proficiency.
+
+thresholdr addresses this by treating the estimated probabilities as a description of what the truth could plausibly be.
+A respondent with a probability of proficiency of 0.8 should be truly proficient in about 80% of plausible realities.
+By repeatedly generating sets of "true" classifications that are consistent with the estimated probabilities, we can calculate an optimal threshold for each generated set and summarize the results.
+thresholdr provides two approaches for doing this:
+
+* **Resampling**: Generate many independent sets of "true" values directly from the estimated probabilities, find the optimal threshold for each set, and average them.
+* **Iteration**: Search for a *self-consistent* threshold. Each iteration generates "true" values that are weighted toward the current threshold estimate, and then calculates a new optimal threshold from those values. Multiple chains are run from different starting points, and convergence is checked with the $\widehat{R}$ statistic [@vehtari2021].
+
+Both approaches return the estimated optimal threshold along with the distribution of performance metrics (e.g., sensitivity and specificity) across all of the generated sets of "true" values.
+
+### `find_threshold()`
+
+The main function in thresholdr is `find_threshold()`.
+When given an estimated model, `find_threshold()` extracts the probabilities of proficiency and estimates an optimal threshold for each attribute.
+By default, thresholds are estimated using resampling (`approx_method = "resample"`) and Youden's J statistic (`optimal_method = "youden"`).
+We can also manually specify additional threshold to compare to the estimated optimal threshold.
+In this example, we'll supply `comp_thresholds = 0.5` so that we can compare the estimated optimal threshold to the traditional value of 0.5.
+
+```{r}
+#| label: find-threshold
+
+set.seed(1213)
+dtmr_thresholds <- find_threshold(dtmr_lcdm, comp_thresholds = 0.5)
+dtmr_thresholds
+```
+
+The result contains one row per threshold per attribute.
+For each attribute, the first row is the estimated optimal threshold and the second row is our comparison threshold of 0.5.
+The remaining columns are [rvar](https://mc-stan.org/posterior/articles/rvar.html) objects from the posterior package.
+Each rvar contains the full distribution of a performance metric across all of the generated sets of "true" values, printed as a mean ± standard deviation.
+By default, the metrics are sensitivity, specificity, the J-index, and the distance from perfect classification (see `probably::threshold_perf()`); a different set of metrics can be requested with the `metrics` argument.
+
+Because each rvar is a full distribution, we can summarize it however we like.
+For example, we can calculate the expected value and a 90% interval for the J-index of each threshold.
+
+```{r}
+#| label: summarize-rvar
+
+dtmr_thresholds |>
+  mutate(
+    j_mean = E(j_index),
+    j_lower = as.vector(quantile(j_index, probs = 0.05)),
+    j_upper = as.vector(quantile(j_index, probs = 0.95))
+  ) |>
+  select(attribute, threshold, j_mean, j_lower, j_upper)
+```
+
+### How close did we get?
+
+Because the DTMR data are simulated, we can calculate the true optimal Youden threshold for each attribute and compare it to our estimates.
+
+```{r}
+#| label: true-thresholds
+
+library(purrr)
+
+all_comparison <- map(colnames(dtmr_probs)[-1], \(x) {
+  left_join(
+    select(dtmr_probs, id, estimate = !!x),
+    select(dcmdata::dtmr_true_profiles, id, truth = !!x),
+    by = "id"
+  ) |>
+    mutate(attribute = x, .after = id)
+}) |>
+  list_rbind()
+
+threshold_comparison <- all_comparison |>
+  summarize(true_optimal = calc_youden(estimate, truth), .by = attribute) |>
+  left_join(
+    dtmr_thresholds |>
+      filter(threshold != .5) |>
+      select(attribute, estimated_threshold = threshold),
+    by = "attribute"
+  )
+
+threshold_comparison
+```
+
+For three of the four attributes (`referent_units`, `appropriateness`, and `multiplicative_comparison`), the estimated threshold moves away from 0.5 in the same direction as the true optimal threshold.
+For partitioning and iterating, however, the estimated threshold stays close to 0.5, even though the true optimal threshold is noticeably higher.
+The estimates are approximations, and they are only as good as the estimated probabilities they are based on.
+
+We can visualize the results on the ROC curve for an attribute.
+The figure below shows the true ROC curve for referent units, along with the points corresponding to the true optimal threshold, the estimated optimal threshold, and the traditional threshold of 0.5.
+
+```{r}
+#| label: fig-roc
+#| echo: false
+#| fig-width: 6
+#| fig-height: 6.5
+#| out-width: "90%"
+#| fig-cap: ROC curve for eac attribute
+#| fig-alt: |
+#|   ROC curves with 1 minus specificity on the x-axis and sensitivity on the
+#|   y-axis. The curves bow sharply toward the top-left corner. Three points are
+#|   marked near the top-left of each curve: the true optimal threshold, the
+#|   estimated optimal threshold, and the threshold of 0.5.
+
+library(tidyr)
+
+dtmr_thresholds$attribute <- factor(
+  dtmr_thresholds$attribute,
+  levels = colnames(dtmr_probs)[-1]
+)
+
+all_comparison |>
+  nest(data = -attribute) |>
+  mutate(
+    roc = map(data, \(x) create_roc(x$estimate, x$truth)),
+    attribute = factor(attribute, levels = colnames(dtmr_probs)[-1])
+  ) |>
+  select(-data) |>
+  unnest(roc) |>
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+  facet_wrap(~attribute, nrow = 2) +
+  geom_path() +
+  geom_point(
+    data = ~ semi_join(
+      .x,
+      threshold_comparison,
+      by = c("attribute", ".threshold" = "true_optimal")
+    ),
+    aes(
+      x = 1 - specificity,
+      y = sensitivity,
+      color = "True optimal",
+      shape = "True optimal"
+    )
+  ) +
+  geom_point(
+    data = filter(dtmr_thresholds, threshold != .5),
+    aes(
+      x = 1 - E(specificity),
+      y = E(sensitivity),
+      color = "Estimated optimal",
+      shape = "Estimated optimal"
+    )
+  ) +
+  geom_point(
+    data = filter(dtmr_thresholds, threshold == .5),
+    aes(
+      x = 1 - E(specificity),
+      y = E(sensitivity),
+      color = "Traditional (.5)",
+      shape = "Traditional (.5)"
+    )
+  ) +
+  geom_abline(lty = 3) +
+  coord_equal() +
+  scale_color_discrete(
+    limits = c("True optimal", "Estimated optimal", "Traditional (.5)")
+  ) +
+  scale_shape_discrete(
+    limits = c("True optimal", "Estimated optimal", "Traditional (.5)")
+  ) +
+  labs(color = NULL, shape = NULL) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
+
+## Customizing the estimation
+
+`find_threshold()` and the lower-level `optimal_resample()` and `optimal_iterate()` functions offer options for customizing the estimation.
+Some of the most useful are:
+
+* `optimal_method`: Choose a different criterion for the optimal threshold (see @tbl-methods).
+* `comp_thresholds`: Evaluate one or more competing thresholds alongside the optimal threshold.
+* `metrics`: Supply a `yardstick::metric_set()` to change the performance metrics that are reported.
+
+For example, we could estimate thresholds using the concordance probability method and report accuracy and Cohen's kappa instead of the default metrics.
+
+```{r}
+#| label: customize
+
+set.seed(1213)
+
+find_threshold(
+  dtmr_lcdm,
+  optimal_method = "cz",
+  samples = 500,
+  metrics = metric_set(yardstick::accuracy, yardstick::kap)
+)
+```
+
+If you are working with probabilities that did not come from a model object, you can pass a vector of probabilities, rather than a fitted model, directly to `optimal_resample()` or `optimal_iterate()`.
+
+```{r}
+#| label: vector
+set.seed(1213)
+optimal_resample(
+  estimates = dtmr_probs$appropriateness,
+  optimal_method = "youden",
+  comp_thresholds = 0.5
+)
+```
+
+## Supported models
+
+In addition to models estimated with measr, `find_threshold()` works with models estimated by several other R packages for DCMs:
+
+* `{measr}`: `measr::dcm_estimate()`
+* `{GDINA}`: `GDINA::GDINA()`
+* `{CDM}`: `CDM::din()`, `CDM::gdina()`, `CDM::gdm()` (dichotomous attributes only), and `CDM::mcdina()`
+
+## References {.appendix}
