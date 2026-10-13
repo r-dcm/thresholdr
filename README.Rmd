@@ -11,8 +11,6 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
-
-options(tidyverse.quiet = TRUE)
 ```
 
 # thresholdr <a href="https://thresholdr.r-dcm.org"><img src="man/figures/logo.png" align="right" height="138" alt="thresholdr website" /></a>
@@ -37,8 +35,8 @@ remotes::install_github("r-dcm/thresholdr")
 
 ## Example usage
 
-There the true classifications are known, we can determine the optimal threshold using a supported method, such as Youden's J statistic.
-For example, using simulated data where the true attribute classifications are known, we can calculate the optimal probability classification threshold using `calc_youden()`:
+When the true classifications are known, we can calculate the optimal threshold directly using a supported method, such as Youden's J statistic.
+For example, `dcm_probs` contains estimated probabilities of proficiency from a simulated diagnostic classification model, along with the true classifications:
 
 ```{r example}
 library(thresholdr)
@@ -46,41 +44,17 @@ library(thresholdr)
 calc_youden(estimates = dcm_probs$att1$estimate, truth = dcm_probs$att1$truth)
 ```
 
-However, in practice the true attribute classifications are unknown. In this scenario, we can estimate what the optimal threshold should be using, for example, resampling:
+In practice, however, the true classifications are unknown.
+Instead, we can estimate the optimal threshold from the probabilities alone, for example by resampling, and compare it to the traditional threshold of 0.5:
 
-```{r}
-optimal_resample(estimates = dcm_probs$att1$estimate, optimal_method = "youden")
+```{r resample}
+set.seed(1213)
+optimal_resample(
+  estimates = dcm_probs$att1$estimate,
+  optimal_method = "youden",
+  comp_thresholds = 0.5
+)
 ```
 
-This results in a threshold that is similar, although slightly higher, than what we know the true optimal threshold should be.
-We can also visualize our estimate on an ROC curve.
-Here again we see that our estimated optimal threshold from the resamples are very close to the true value.
-
-```{r echo = FALSE, message = FALSE, dev = "ragg_png"}
-library(tidyverse)
-library(posterior)
-
-yd_op <- calc_youden(
-  estimates = dcm_probs$att1$estimate,
-  truth = dcm_probs$att1$truth
-)
-yd_rs <- optimal_resample(
-  estimates = dcm_probs$att1$estimate,
-  optimal_method = "youden"
-)
-
-create_roc(estimates = dcm_probs$att1$estimate, truth = dcm_probs$att1$truth) |>
-  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
-  geom_path() +
-  geom_point(
-    data = ~ filter(.x, .threshold == yd_op),
-    aes(x = 1 - specificity, y = sensitivity, color = "Youden's J")
-  ) +
-  geom_point(
-    data = yd_rs,
-    aes(x = 1 - E(specificity), y = E(sensitivity), color = "Resample Estimate")
-  ) +
-  geom_abline(lty = 3) +
-  coord_equal() +
-  theme_bw()
-```
+To estimate thresholds for every attribute in a model fitted with `{measr}`, `{GDINA}`, or `{CDM}`, use `find_threshold()`.
+For a complete walk-through, see the `vignette("thresholdr")` article.
