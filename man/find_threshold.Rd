@@ -30,6 +30,13 @@ A \link[tibble:tibble-package]{tibble} with one row per threshold and
 threshold is listed first, followed by any comparison thresholds. For a
 numeric vector, the result is the same as calling \code{\link[=optimal_resample]{optimal_resample()}} or
 \code{\link[=optimal_iterate]{optimal_iterate()}} directly, and there is no \code{attribute} column.
+
+When \code{approx_method = "iterate"}, the returned object also has the
+\code{"converged"} and \code{"diagnostics"} attributes described in
+\code{\link[=optimal_iterate]{optimal_iterate()}}. For model objects, these are combined across
+attributes: \code{"converged"} is \code{TRUE} only if all attributes converged, and
+\code{"diagnostics"} includes an additional \code{attribute} column identifying the
+attribute for each row.
 }
 \description{
 \code{find_threshold()} is an S7 generic that finds the optimal probability

@@ -30,6 +30,13 @@
 #'   threshold is listed first, followed by any comparison thresholds. For a
 #'   numeric vector, the result is the same as calling [optimal_resample()] or
 #'   [optimal_iterate()] directly, and there is no `attribute` column.
+#'
+#'   When `approx_method = "iterate"`, the returned object also has the
+#'   `"converged"` and `"diagnostics"` attributes described in
+#'   [optimal_iterate()]. For model objects, these are combined across
+#'   attributes: `"converged"` is `TRUE` only if all attributes converged, and
+#'   `"diagnostics"` includes an additional `attribute` column identifying the
+#'   attribute for each row.
 #' @export
 find_threshold <- new_generic(
   "find_threshold",
@@ -76,19 +83,15 @@ method(find_threshold, measrdcm) <- function(
   approx_method = c("resample", "iterate"),
   optimal_method = "youden"
 ) {
-  method_func <- get_approx_function(approx_method)
-
   measr::measr_extract(x, "attribute_prob") |>
     dplyr::select(dplyr::all_of(names(
       x@model_spec@qmatrix_meta$attribute_names
     ))) |>
-    apply(
-      MARGIN = 2,
-      FUN = method_func,
+    find_attribute_thresholds(
+      approx_method = approx_method,
       optimal_method = optimal_method,
       ...
-    ) |>
-    purrr::list_rbind(names_to = "attribute")
+    )
 }
 
 ## GDINA -----------------------------------------------------------------------
@@ -98,8 +101,6 @@ method(find_threshold, new_S3_class("GDINA")) <- function(
   approx_method = c("resample", "iterate"),
   optimal_method = "youden"
 ) {
-  method_func <- get_approx_function(approx_method)
-
   att_names <- if (is.null(colnames(x$options$Q))) {
     paste0("A", seq_len(ncol(x$options$Q)))
   } else {
@@ -108,13 +109,11 @@ method(find_threshold, new_S3_class("GDINA")) <- function(
 
   GDINA::personparm(x, what = "mp") |>
     tibble::as_tibble(.name_repair = \(x) att_names) |>
-    apply(
-      MARGIN = 2,
-      FUN = method_func,
+    find_attribute_thresholds(
+      approx_method = approx_method,
       optimal_method = optimal_method,
       ...
-    ) |>
-    purrr::list_rbind(names_to = "attribute")
+    )
 }
 
 # CDM --------------------------------------------------------------------------
@@ -124,16 +123,12 @@ method(find_threshold, new_S3_class("GDINA")) <- function(
   approx_method = c("resample", "iterate"),
   optimal_method = "youden"
 ) {
-  method_func <- get_approx_function(approx_method)
-
   cdm_attribute_probs(x, call = rlang::call2("find_threshold")) |>
-    apply(
-      MARGIN = 2,
-      FUN = method_func,
+    find_attribute_thresholds(
+      approx_method = approx_method,
       optimal_method = optimal_method,
       ...
-    ) |>
-    purrr::list_rbind(names_to = "attribute")
+    )
 }
 
 method(find_threshold, new_S3_class("din")) <- .find_threshold_cdm

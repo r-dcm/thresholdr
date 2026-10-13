@@ -54,9 +54,12 @@
 #' values used at each iteration to monitor that value for convergence as well.
 #' A warning is produced if the threshold or, if specified, the
 #' `additional_criterion` do not meet the convergence criteria of an
-#' \eqn{\hat{R}} less than 1.01 recommended by Vehtari et al. (2021). Bulk and
-#' tail effective sample sizes are also calculated, and all diagnostics are
-#' returned in the `"diagnostics"` attribute of the returned object.
+#' \eqn{\hat{R}} less than 1.01 recommended by Vehtari et al. (2021). The
+#' \eqn{\hat{R}} is undefined (`NA`) when every iteration in every chain
+#' produces the same value. Because this indicates that the chains agree
+#' perfectly, the statistic is considered converged. Bulk and tail effective
+#' sample sizes are also calculated, and all diagnostics are returned in the
+#' `"diagnostics"` attribute of the returned object.
 #'
 #' Finally, the average threshold is applied to the samples of "true" values
 #' that were generated at each iteration to calculate performance metrics for
@@ -82,11 +85,11 @@
 #'
 #' The returned object also has two attributes:
 #'   * `"converged"`: A logical indicating whether all monitored statistics
-#'     have an \eqn{\hat{R}} less than 1.01.
+#'     have converged.
 #'   * `"diagnostics"`: A [tibble][tibble::tibble-package] with one row per
 #'     monitored statistic (`parameter`) and the \eqn{\hat{R}} (`rhat`), bulk
-#'     effective sample size (`ess_bulk`), and tail effective sample size
-#'     (`ess_tail`).
+#'     effective sample size (`ess_bulk`), tail effective sample size
+#'     (`ess_tail`), and whether the statistic converged (`converged`).
 #' @export
 #' @family threshold approximation methods
 #' @concept rvar
@@ -175,11 +178,13 @@ optimal_iterate <- function(
     diag_draws,
     \(x, parameter) {
       draws <- matrix(x, nrow = iter_retain, ncol = chains)
+      rhat <- posterior::rhat(draws)
       tibble::tibble(
         parameter = parameter,
-        rhat = posterior::rhat(draws),
+        rhat = rhat,
         ess_bulk = posterior::ess_bulk(draws),
-        ess_tail = posterior::ess_tail(draws)
+        ess_tail = posterior::ess_tail(draws),
+        converged = statistic_converged(draws, rhat)
       )
     }
   ) |>
@@ -228,16 +233,16 @@ optimal_iterate <- function(
 
   # print diagnostics and return -----
   attr(results, "diagnostics") <- chain_diagnostics
-  if (any(chain_diagnostics$rhat > 1.01)) {
+  if (!all(chain_diagnostics$converged)) {
     attr(results, "converged") <- FALSE
 
     chain_diagnostics |>
-      dplyr::filter(.data$rhat > 1.01) |>
+      dplyr::filter(!.data$converged) |>
       glue::glue_data(
         "Statistic did not converge (Rhat > 1.01): ",
         "{{.arg {paste(parameter)}}}"
       ) |>
-      cli::cli_warn()
+      cli::cli_warn(class = "thresholdr_warning_convergence")
   } else {
     attr(results, "converged") <- TRUE
   }
@@ -294,4 +299,23 @@ iterate_chain <- function(
     truth = tru,
     threshold = thr
   )
+}
+
+
+#' Determine whether a monitored statistic has converged
+#'
+#' @param draws A matrix of draws for the statistic, with one column per chain.
+#' @param rhat The \eqn{\hat{R}} calculated from `draws`.
+#'
+#' @return A logical scalar. `TRUE` if `rhat` is less than or equal to 1.01.
+#'   [posterior::rhat()] returns `NA` when all `draws` are identical, which
+#'   indicates perfect agreement between chains, so that is also `TRUE`. Any
+#'   other `NA` (e.g., from missing `draws`) is `FALSE`.
+#' @noRd
+statistic_converged <- function(draws, rhat) {
+  if (is.na(rhat)) {
+    return(!anyNA(draws) && length(unique(as.vector(draws))) == 1L)
+  }
+
+  rhat <= 1.01
 }

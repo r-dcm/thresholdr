@@ -69,11 +69,11 @@ iterations (i.e., 1 column per specified metric).
 The returned object also has two attributes:
 \itemize{
 \item \code{"converged"}: A logical indicating whether all monitored statistics
-have an \eqn{\hat{R}} less than 1.01.
+have converged.
 \item \code{"diagnostics"}: A \link[tibble:tibble-package]{tibble} with one row per
 monitored statistic (\code{parameter}) and the \eqn{\hat{R}} (\code{rhat}), bulk
-effective sample size (\code{ess_bulk}), and tail effective sample size
-(\code{ess_tail}).
+effective sample size (\code{ess_bulk}), tail effective sample size
+(\code{ess_tail}), and whether the statistic converged (\code{converged}).
 }
 }
 \description{
@@ -118,9 +118,12 @@ For example, we could calculate the area under the ROC curve with the "true"
 values used at each iteration to monitor that value for convergence as well.
 A warning is produced if the threshold or, if specified, the
 \code{additional_criterion} do not meet the convergence criteria of an
-\eqn{\hat{R}} less than 1.01 recommended by Vehtari et al. (2021). Bulk and
-tail effective sample sizes are also calculated, and all diagnostics are
-returned in the \code{"diagnostics"} attribute of the returned object.
+\eqn{\hat{R}} less than 1.01 recommended by Vehtari et al. (2021). The
+\eqn{\hat{R}} is undefined (\code{NA}) when every iteration in every chain
+produces the same value. Because this indicates that the chains agree
+perfectly, the statistic is considered converged. Bulk and tail effective
+sample sizes are also calculated, and all diagnostics are returned in the
+\code{"diagnostics"} attribute of the returned object.
 
 Finally, the average threshold is applied to the samples of "true" values
 that were generated at each iteration to calculate performance metrics for

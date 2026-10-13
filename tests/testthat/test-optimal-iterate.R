@@ -208,10 +208,12 @@ test_that("chains and diagnostics work", {
   diag <- attr(it_logodds, "diagnostics")
   expect_equal(
     colnames(diag),
-    c("parameter", "rhat", "ess_bulk", "ess_tail")
+    c("parameter", "rhat", "ess_bulk", "ess_tail", "converged")
   )
   expect_equal(diag$parameter, c("threshold", "roc_auc"))
   expect_true(all(is.finite(diag$rhat)))
+  expect_type(diag$converged, "logical")
+  expect_equal(attr(it_logodds, "converged"), all(diag$converged))
 
   it_single <- suppressWarnings(
     optimal_iterate(
@@ -243,4 +245,33 @@ test_that("optimal threshold is first, then comparison thresholds", {
   expect_equal(nrow(it_youden), 4L)
   expect_false(it_youden$threshold[1] %in% c(0.8, 0.05, 0.5))
   expect_equal(it_youden$threshold[-1], c(0.8, 0.05, 0.5))
+})
+
+test_that("undefined rhat is handled", {
+  # all draws identical: chains agree perfectly
+  expect_true(statistic_converged(matrix(0.5, 10, 2), rhat = NA_real_))
+  # missing draws: convergence cannot be assessed
+  draws <- matrix(runif(20), 10, 2)
+  draws[1, 1] <- NA
+  expect_false(statistic_converged(draws, rhat = NA_real_))
+  # otherwise, compare to the 1.01 cut-off
+  expect_true(statistic_converged(draws, rhat = 1.01))
+  expect_false(statistic_converged(draws, rhat = 1.02))
+  expect_false(statistic_converged(draws, rhat = Inf))
+
+  # well-separated estimates give the same threshold at every iteration
+  withr::local_seed(1213)
+  expect_no_warning(
+    it_constant <- optimal_iterate(
+      estimates = c(rep(0.02, 50), rep(0.98, 50)),
+      optimal_method = "youden",
+      chains = 2,
+      iter_burnin = 5,
+      iter_retain = 10
+    )
+  )
+  diag <- attr(it_constant, "diagnostics")
+  expect_true(is.na(diag$rhat))
+  expect_true(diag$converged)
+  expect_true(attr(it_constant, "converged"))
 })

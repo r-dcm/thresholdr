@@ -122,6 +122,8 @@ test_that("measrdcm method works", {
   )
   expect_equal(thld$attribute, colnames(dcmdata::pie_ft_qmatrix)[-1])
   expect_type(thld$threshold, "double")
+  expect_null(attr(thld, "diagnostics"))
+  expect_null(attr(thld, "converged"))
   expect_s3_class(thld$sensitivity, "rvar")
   expect_s3_class(thld$specificity, "rvar")
   expect_s3_class(thld$j_index, "rvar")
@@ -159,6 +161,16 @@ test_that("measrdcm method works", {
     expect_false(att_thresholds[1] %in% c(.5, .8))
     expect_equal(att_thresholds[-1], c(.5, .8))
   }
+
+  # iteration diagnostics are combined across attributes
+  diagnostics <- attr(thld, "diagnostics")
+  expect_s3_class(diagnostics, "tbl_df")
+  expect_equal(
+    colnames(diagnostics),
+    c("attribute", "parameter", "rhat", "ess_bulk", "ess_tail", "converged")
+  )
+  expect_equal(diagnostics$attribute, colnames(dcmdata::pie_ft_qmatrix)[-1])
+  expect_equal(attr(thld, "converged"), all(diagnostics$converged))
 })
 
 test_that("GDINA method works", {
@@ -174,7 +186,7 @@ test_that("GDINA method works", {
   thld <- suppressWarnings(find_threshold(
     gdina_model,
     approx_method = "iterate",
-    iter_burin = 20,
+    iter_burnin = 20,
     iter_retain = 25
   ))
   expect_s3_class(thld, "tbl_df")
@@ -198,6 +210,11 @@ test_that("GDINA method works", {
   expect_s3_class(thld$j_index, "rvar")
   expect_s3_class(thld$distance, "rvar")
   expect_equal(posterior::ndraws(thld$sensitivity), 100L)
+  diagnostics <- attr(thld, "diagnostics")
+  expect_s3_class(diagnostics, "tbl_df")
+  expect_equal(diagnostics$attribute, att_names)
+  expect_equal(diagnostics$parameter, rep("threshold", 3))
+  expect_equal(attr(thld, "converged"), all(diagnostics$converged))
 
   # add comparison thresholds and new metrics ----------------------------------
   gdina_model <- GDINA::GDINA(
@@ -301,6 +318,9 @@ test_that("CDM methods work", {
   expect_equal(thld$attribute, rep(c("A1", "A2", "A3"), each = 3))
   expect_s3_class(thld$ppv, "rvar")
   expect_equal(posterior::ndraws(thld$ppv), 30L)
+  diagnostics <- attr(thld, "diagnostics")
+  expect_equal(diagnostics$attribute, c("A1", "A2", "A3"))
+  expect_equal(attr(thld, "converged"), all(diagnostics$converged))
 
   for (att_thresholds in split(thld$threshold, thld$attribute)) {
     expect_false(att_thresholds[1] %in% c(.5, .8))
