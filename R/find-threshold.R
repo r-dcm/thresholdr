@@ -40,7 +40,11 @@ find_threshold <- new_generic(
     approx_method = c("resample", "iterate"),
     optimal_method = "youden"
   ) {
-    approx_method <- rlang::arg_match(approx_method, multiple = FALSE)
+    approx_method <- rlang::arg_match(
+      approx_method,
+      values = approx_method_choices(),
+      multiple = FALSE
+    )
     optimal_method <- rlang::arg_match(
       optimal_method,
       values = optimal_method_choices(),
@@ -59,11 +63,7 @@ method(find_threshold, class_numeric) <- function(
 ) {
   check_double(x, min = 0, max = 1, call = rlang::call2("find_threshold"))
 
-  method_func <- switch(
-    approx_method,
-    "resample" = optimal_resample,
-    "iterate" = optimal_iterate
-  )
+  method_func <- get_approx_function(approx_method)
 
   method_func(estimates = x, optimal_method = optimal_method, ...)
 }
@@ -76,11 +76,7 @@ method(find_threshold, measrdcm) <- function(
   approx_method = c("resample", "iterate"),
   optimal_method = "youden"
 ) {
-  method_func <- switch(
-    approx_method,
-    "resample" = optimal_resample,
-    "iterate" = optimal_iterate
-  )
+  method_func <- get_approx_function(approx_method)
 
   measr::measr_extract(x, "attribute_prob") |>
     dplyr::select(dplyr::all_of(names(
@@ -102,11 +98,7 @@ method(find_threshold, new_S3_class("GDINA")) <- function(
   approx_method = c("resample", "iterate"),
   optimal_method = "youden"
 ) {
-  method_func <- switch(
-    approx_method,
-    "resample" = optimal_resample,
-    "iterate" = optimal_iterate
-  )
+  method_func <- get_approx_function(approx_method)
 
   att_names <- if (is.null(colnames(x$options$Q))) {
     paste0("A", seq_len(ncol(x$options$Q)))
@@ -132,11 +124,7 @@ method(find_threshold, new_S3_class("GDINA")) <- function(
   approx_method = c("resample", "iterate"),
   optimal_method = "youden"
 ) {
-  method_func <- switch(
-    approx_method,
-    "resample" = optimal_resample,
-    "iterate" = optimal_iterate
-  )
+  method_func <- get_approx_function(approx_method)
 
   cdm_attribute_probs(x, call = rlang::call2("find_threshold")) |>
     apply(

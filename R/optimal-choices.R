@@ -58,3 +58,32 @@ get_weighting_function <- function(method) {
     cli::cli_abort("No function found for {.arg method = \"{method}\"}")
   )
 }
+
+
+#' Methods for approximating the optimal threshold
+#'
+#' @return A vector of supported methods for approximating an optimal threshold
+#'   when true classifications are unknown.
+#' @noRd
+approx_method_choices <- function() {
+  c("resample", "iterate")
+}
+
+
+#' Determine the function needed for each approximation method
+#'
+#' @param method The method to use for approximating the optimal threshold.
+#'   Should be one of the values included in `approx_method_choices()`.
+#'
+#' @return The function that corresponds to the chosen method.
+#' @noRd
+get_approx_function <- function(method) {
+  rlang::arg_match(method, values = approx_method_choices())
+
+  switch(
+    method,
+    "resample" = optimal_resample,
+    "iterate" = optimal_iterate,
+    cli::cli_abort("No function found for {.arg method = \"{method}\"}")
+  )
+}
