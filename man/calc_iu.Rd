@@ -21,7 +21,7 @@ Calculate the optimal probability classification threshold using the
 index of union method (IU).
 }
 \details{
-The index of union method (Unal, 2017) is defines the optimal cut point as
+The index of union method (Unal, 2017) defines the optimal cut point as
 the point that minimizes the summed absolute differences between the area
 under the curve (AUC) and the sensitivity and specificity.
 

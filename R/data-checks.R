@@ -4,8 +4,8 @@
 #' @param must The requirement for input values that is not met.
 #' @param not The current state of `argument` that is problematic.
 #' @param extra Additional text to add to the error message.
-#' @param custom A custom error message to override the defaul message of `must`
-#'   + `not` + `extra`.
+#' @param custom A custom error message to override the default message of
+#'   `must` + `not` + `extra`.
 #' @param call The call stack.
 #'
 #' @return An error message created by [cli::cli_abort()].
@@ -142,7 +142,7 @@ valid_numeric <- function(
 #' @param x A character vector. Should be the name of a class probability metric
 #'  from the yardstick package (e.g., `"roc_auc"`, `"brier_class"`).
 #' @param arg The argument name for the error message.
-#' @param call The call stack for the error mesasge.
+#' @param call The call stack for the error message.
 #'
 #' @return If `x` is the name of a valid probability metric from yardstick, that
 #'   function is returned. Otherwise, an error message is returned with

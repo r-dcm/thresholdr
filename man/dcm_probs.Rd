@@ -5,7 +5,7 @@
 \alias{dcm_probs}
 \title{Example probabilities from a diagnostic classification model}
 \format{
-\code{dcm_probs} is a list contain true attribute classifications and
+\code{dcm_probs} is a list containing true attribute classifications and
 estimated probabilities of proficiency for the 3 attributes in the simulated
 data. Each element is itself a list containing a vector of attribute
 estimates and a vector of true classifications.
@@ -41,7 +41,7 @@ dcm_probs
 }
 \description{
 Estimates of attribute mastery and true classification values for use in
-demonstrating the functionality of the threshold
+demonstrating the functionality of thresholdr.
 }
 \details{
 The data was simulated from the loglinear cognitive diagnostic model (LCDM;

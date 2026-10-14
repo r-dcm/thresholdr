@@ -6,12 +6,12 @@
 #' @inheritParams create_roc
 #'
 #' @details
-#' Youden's J statistic (Youden, 1950) is defined as `sensitivty` +
+#' Youden's J statistic (Youden, 1950) is defined as `sensitivity` +
 #' `specificity` - 1. As such, the value of the J-index ranges from \[0, 1\],
-#' and is 1 when there are no false positive and no false negatives (i.e.,
-#' sensitivity and specificity). The J-index is calculated for each possible
-#' threshold defined by the ROC curve (e.g., [create_roc()]).  The optimality
-#' criterion is then defined as:
+#' and is 1 when there are no false positives and no false negatives (i.e.,
+#' perfect sensitivity and specificity). The J-index is calculated for each
+#' possible threshold defined by the ROC curve (e.g., [create_roc()]). The
+#' optimality criterion is then defined as:
 #'
 #' \deqn{\text{max}(sensitivity + specificity - 1)}
 #'
@@ -166,7 +166,7 @@ calc_cz <- function(estimates, truth) {
 #' @inheritParams create_roc
 #'
 #' @details
-#' The index of union method (Unal, 2017) is defines the optimal cut point as
+#' The index of union method (Unal, 2017) defines the optimal cut point as
 #' the point that minimizes the summed absolute differences between the area
 #' under the curve (AUC) and the sensitivity and specificity.
 #'
