@@ -21,6 +21,37 @@
       Error in `find_threshold()`:
       ! `optimal_method` must be one of "youden", "topleft", "cz", "gmean", "iu", or "minp", not "accuracy".
 
+# data frame and matrix methods check inputs
+
+    Code
+      find_threshold(probs)
+    Condition
+      Error in `find_threshold()`:
+      ! All columns of `x` must be numeric probabilities.
+      x Non-numeric column: `id`.
+      i Remove any respondent identifiers before finding thresholds.
+    Code
+      find_threshold(probs[, c("att1", "att2")])
+    Condition
+      Error in `find_threshold()`:
+      ! `x$att2` must be a number between 0 and 1, not the number 1.3.
+    Code
+      find_threshold(as.matrix(probs[, c("att1", "att2")]))
+    Condition
+      Error in `find_threshold()`:
+      ! `x[, "att2"]` must be a number between 0 and 1, not the number 1.3.
+    Code
+      find_threshold(probs[, 0])
+    Condition
+      Error in `find_threshold()`:
+      ! `x` must have at least one column.
+    Code
+      find_threshold(data.frame(a = c(0.1, 0.9), a = c(0.2, 0.8), check.names = FALSE))
+    Condition
+      Error in `find_threshold()`:
+      ! Column names of `x` must be unique.
+      x Duplicated name: "a".
+
 # CDM gdm method works
 
     Code

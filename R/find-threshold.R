@@ -7,6 +7,10 @@
 #'
 #' * `numeric`: A vector of probabilities (e.g., the probabilities of
 #'   proficiency on a single attribute).
+#' * `data.frame` or `matrix`: Probabilities for multiple attributes, with one
+#'   column per attribute. All columns must be numeric, so remove any
+#'   respondent identifiers first. Column names are used as the attribute
+#'   names. Unnamed matrix columns are named `A1`, `A2`, etc.
 #' * \pkg{measr}
 #'   * `measrdcm`: Models estimated with [measr::dcm_estimate()].
 #' * \pkg{GDINA}
@@ -19,7 +23,8 @@
 #'   * `mcdina`: Models estimated with [CDM::mcdina()].
 #'
 #' @inheritParams optimal_resample
-#' @param x A numeric vector of probabilities or an estimated model object.
+#' @param x A numeric vector of probabilities, a data frame or matrix of
+#'   probabilities with one column per attribute, or an estimated model object.
 #' @param ... Additional arguments passed to the approximation function defined
 #'   by `approx_method`.
 #' @param approx_method The approximation method to use. One of `"resample"`,
@@ -33,7 +38,7 @@
 #'
 #'   When `approx_method = "iterate"`, the returned object also has the
 #'   `"converged"` and `"diagnostics"` attributes described in
-#'   [optimal_iterate()]. For model objects, these are combined across
+#'   [optimal_iterate()]. For multiple attributes, these are combined across
 #'   attributes: `"converged"` is `TRUE` only if all attributes converged, and
 #'   `"diagnostics"` includes an additional `attribute` column identifying the
 #'   attribute for each row.
@@ -68,12 +73,43 @@ method(find_threshold, class_numeric) <- function(
   approx_method = c("resample", "iterate"),
   optimal_method = "youden"
 ) {
+  # S7 dispatches numeric matrices on their base type, so handle them here
+  if (is.matrix(x)) {
+    return(
+      .find_threshold_columns(
+        x,
+        ...,
+        approx_method = approx_method,
+        optimal_method = optimal_method
+      )
+    )
+  }
+
   check_double(x, min = 0, max = 1, call = rlang::call2("find_threshold"))
 
   method_func <- get_approx_function(approx_method)
 
   method_func(estimates = x, optimal_method = optimal_method, ...)
 }
+
+## data frames and matrices ---------------------------------------------------
+.find_threshold_columns <- function(
+  x,
+  ...,
+  approx_method = c("resample", "iterate"),
+  optimal_method = "youden"
+) {
+  check_attribute_probs(x, call = rlang::call2("find_threshold")) |>
+    find_attribute_thresholds(
+      approx_method = approx_method,
+      optimal_method = optimal_method,
+      ...
+    )
+}
+
+# nolint start: object_name_linter.
+method(find_threshold, class_data.frame) <- .find_threshold_columns
+# nolint end
 
 ## measr -----------------------------------------------------------------------
 measrdcm <- new_external_class("measr", "measrdcm")

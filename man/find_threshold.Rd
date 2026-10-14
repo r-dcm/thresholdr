@@ -12,7 +12,8 @@ find_threshold(
 )
 }
 \arguments{
-\item{x}{A numeric vector of probabilities or an estimated model object.}
+\item{x}{A numeric vector of probabilities, a data frame or matrix of
+probabilities with one column per attribute, or an estimated model object.}
 
 \item{...}{Additional arguments passed to the approximation function defined
 by \code{approx_method}.}
@@ -33,7 +34,7 @@ numeric vector, the result is the same as calling \code{\link[=optimal_resample]
 
 When \code{approx_method = "iterate"}, the returned object also has the
 \code{"converged"} and \code{"diagnostics"} attributes described in
-\code{\link[=optimal_iterate]{optimal_iterate()}}. For model objects, these are combined across
+\code{\link[=optimal_iterate]{optimal_iterate()}}. For multiple attributes, these are combined across
 attributes: \code{"converged"} is \code{TRUE} only if all attributes converged, and
 \code{"diagnostics"} includes an additional \code{attribute} column identifying the
 attribute for each row.
@@ -45,6 +46,10 @@ diagnostic classification model with one of the following classes:
 \itemize{
 \item \code{numeric}: A vector of probabilities (e.g., the probabilities of
 proficiency on a single attribute).
+\item \code{data.frame} or \code{matrix}: Probabilities for multiple attributes, with one
+column per attribute. All columns must be numeric, so remove any
+respondent identifiers first. Column names are used as the attribute
+names. Unnamed matrix columns are named \code{A1}, \code{A2}, etc.
 \item \pkg{measr}
 \itemize{
 \item \code{measrdcm}: Models estimated with \code{\link[measr:dcm_estimate]{measr::dcm_estimate()}}.

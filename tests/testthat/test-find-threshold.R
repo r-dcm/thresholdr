@@ -92,6 +92,106 @@ test_that("numeric method checks inputs", {
   })
 })
 
+test_that("data frame and matrix methods work", {
+  probs <- data.frame(
+    att1 = dcm_probs$att1$estimate,
+    att2 = dcm_probs$att2$estimate,
+    att3 = dcm_probs$att3$estimate
+  )
+
+  # defaults -------------------------------------------------------------------
+  thld <- find_threshold(probs, samples = 50)
+  expect_s3_class(thld, "tbl_df")
+  expect_equal(
+    colnames(thld),
+    c(
+      "attribute",
+      "threshold",
+      "sensitivity",
+      "specificity",
+      "j_index",
+      "distance"
+    )
+  )
+  expect_equal(thld$attribute, c("att1", "att2", "att3"))
+  expect_true(all(thld$threshold >= 0 & thld$threshold <= 1))
+  expect_s3_class(thld$sensitivity, "rvar")
+  expect_equal(posterior::ndraws(thld$sensitivity), 50L)
+  expect_null(attr(thld, "diagnostics"))
+
+  # add comparison thresholds and use iteration --------------------------------
+  thld <- suppressWarnings(find_threshold(
+    tibble::as_tibble(probs),
+    approx_method = "iterate",
+    chains = 2,
+    iter_burnin = 10,
+    iter_retain = 15,
+    comp_thresholds = .5
+  ))
+  expect_equal(thld$attribute, rep(c("att1", "att2", "att3"), each = 2))
+  for (att_thresholds in split(thld$threshold, thld$attribute)) {
+    expect_false(att_thresholds[1] == .5)
+    expect_equal(att_thresholds[2], .5)
+  }
+  diagnostics <- attr(thld, "diagnostics")
+  expect_equal(diagnostics$attribute, c("att1", "att2", "att3"))
+  expect_equal(attr(thld, "converged"), all(diagnostics$converged))
+
+  # matrices -------------------------------------------------------------------
+  thld <- find_threshold(as.matrix(probs), samples = 50)
+  expect_equal(thld$attribute, c("att1", "att2", "att3"))
+  expect_equal(posterior::ndraws(thld$sensitivity), 50L)
+
+  thld <- find_threshold(unname(as.matrix(probs)), samples = 50)
+  expect_equal(thld$attribute, c("A1", "A2", "A3"))
+
+  thld <- find_threshold(as.matrix(probs[, "att2", drop = FALSE]), samples = 50)
+  expect_equal(thld$attribute, "att2")
+})
+
+test_that("data frame method matches each attribute's vector", {
+  probs <- data.frame(
+    att1 = dcm_probs$att1$estimate,
+    att2 = dcm_probs$att2$estimate
+  )
+
+  withr::local_seed(1213)
+  combined <- find_threshold(probs, optimal_method = "cz", samples = 30)
+
+  withr::local_seed(1213)
+  att1 <- find_threshold(probs$att1, optimal_method = "cz", samples = 30)
+  att2 <- find_threshold(probs$att2, optimal_method = "cz", samples = 30)
+
+  expect_equal(combined$attribute, c("att1", "att2"))
+  expect_identical(combined[, -1], dplyr::bind_rows(att1, att2))
+
+  withr::local_seed(1213)
+  from_matrix <- find_threshold(
+    as.matrix(probs),
+    optimal_method = "cz",
+    samples = 30
+  )
+  expect_identical(from_matrix, combined)
+})
+
+test_that("data frame and matrix methods check inputs", {
+  probs <- data.frame(
+    id = paste0("r", 1:4),
+    att1 = c(0.2, 0.8, 0.6, 0.4),
+    att2 = c(0.1, 0.9, 1.3, 0.5)
+  )
+
+  expect_snapshot(error = TRUE, {
+    find_threshold(probs)
+    find_threshold(probs[, c("att1", "att2")])
+    find_threshold(as.matrix(probs[, c("att1", "att2")]))
+    find_threshold(probs[, 0])
+    find_threshold(
+      data.frame(a = c(0.1, 0.9), a = c(0.2, 0.8), check.names = FALSE)
+    )
+  })
+})
+
 test_that("measrdcm method works", {
   skip_if_not_installed("measr")
   skip_if_not_installed("dcmdata")

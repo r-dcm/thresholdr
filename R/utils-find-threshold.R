@@ -162,3 +162,62 @@ warn_attribute_convergence <- function(diagnostics) {
     class = "thresholdr_warning_convergence"
   )
 }
+
+
+#' Check a data frame or matrix of attribute probabilities
+#'
+#' @param x A data frame or matrix with one column per attribute.
+#' @param call The call stack for the error message.
+#'
+#' @return `x`, with default column names (`A1`, `A2`, etc.) if `x` is an
+#'   unnamed matrix. An error is returned if `x` has no columns, has duplicated
+#'   column names, has non-numeric columns, or contains values that are not
+#'   probabilities.
+#' @noRd
+check_attribute_probs <- function(x, call = rlang::caller_env()) {
+  if (ncol(x) == 0) {
+    cli::cli_abort("{.arg x} must have at least one column.", call = call)
+  }
+  if (is.null(colnames(x))) {
+    colnames(x) <- paste0("A", seq_len(ncol(x)))
+  }
+
+  att_names <- colnames(x)
+  dup_names <- unique(att_names[duplicated(att_names)])
+  if (length(dup_names) > 0) {
+    cli::cli_abort(
+      c(
+        "Column names of {.arg x} must be unique.",
+        x = "Duplicated name{?s}: {.val {dup_names}}."
+      ),
+      call = call
+    )
+  }
+
+  if (is.data.frame(x)) {
+    non_numeric <- att_names[!vapply(x, is.numeric, logical(1))]
+    if (length(non_numeric) > 0) {
+      cli::cli_abort(
+        c(
+          "All columns of {.arg x} must be numeric probabilities.",
+          x = "Non-numeric column{?s}: {.var {non_numeric}}.",
+          i = "Remove any respondent identifiers before finding thresholds."
+        ),
+        call = call
+      )
+    }
+  }
+
+  for (att in att_names) {
+    if (is.data.frame(x)) {
+      probs <- x[[att]]
+      arg <- paste0("x$", att)
+    } else {
+      probs <- x[, att]
+      arg <- paste0("x[, \"", att, "\"]")
+    }
+    check_double(probs, min = 0, max = 1, arg = arg, call = call)
+  }
+
+  x
+}
