@@ -1,4 +1,6 @@
 test_that("attribute probabilities can be extracted from CDM models", {
+  skip_if_not_installed("CDM")
+
   q_matrix <- CDM::sim.qmatrix
   colnames(q_matrix) <- c("add", "sub", "mult")
 

@@ -93,6 +93,9 @@ test_that("numeric method checks inputs", {
 })
 
 test_that("measrdcm method works", {
+  skip_if_not_installed("measr")
+  skip_if_not_installed("dcmdata")
+
   model_spec <- measr::dcm_specify(
     qmatrix = dcmdata::pie_ft_qmatrix,
     identifier = "task"
@@ -174,6 +177,8 @@ test_that("measrdcm method works", {
 })
 
 test_that("GDINA method works", {
+  skip_if_not_installed("GDINA")
+
   gdina_model <- GDINA::GDINA(
     dat = GDINA::sim10GDINA$simdat,
     Q = GDINA::sim10GDINA$simQ,
@@ -257,6 +262,8 @@ test_that("GDINA method works", {
 })
 
 test_that("CDM methods work", {
+  skip_if_not_installed("CDM")
+
   q_matrix <- CDM::sim.qmatrix
   colnames(q_matrix) <- c("add", "sub", "mult")
 
@@ -329,6 +336,8 @@ test_that("CDM methods work", {
 })
 
 test_that("CDM gdm method works", {
+  skip_if_not_installed("CDM")
+
   # names are taken from the columns of `theta.k`
   theta_k <- as.matrix(expand.grid(add = 0:1, sub = 0:1, mult = 0:1))
   utils::capture.output(
