@@ -25,7 +25,7 @@ get_optimal_function <- function(method) {
     "gmean" = calc_gmean,
     "iu" = calc_iu,
     "minp" = calc_minp,
-    cli::cli_abort("No function found for {.arg method = \"{method}\"}")
+    cli::cli_abort("No function found for {.arg method = \"{method}\"}") # nocov
   )
 }
 
@@ -55,7 +55,7 @@ get_weighting_function <- function(method) {
     "beta" = generate_beta_wt_truth,
     "distance" = generate_distance_wt_truth,
     "logodds" = generate_logodds_wt_truth,
-    cli::cli_abort("No function found for {.arg method = \"{method}\"}")
+    cli::cli_abort("No function found for {.arg method = \"{method}\"}") # nocov
   )
 }
 
@@ -84,6 +84,6 @@ get_approx_function <- function(method) {
     method,
     "resample" = optimal_resample,
     "iterate" = optimal_iterate,
-    cli::cli_abort("No function found for {.arg method = \"{method}\"}")
+    cli::cli_abort("No function found for {.arg method = \"{method}\"}") # nocov
   )
 }
