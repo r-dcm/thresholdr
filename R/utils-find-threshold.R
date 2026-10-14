@@ -46,9 +46,6 @@ cdm_attribute_probs <- function(x, call = rlang::caller_env()) {
     )
   }
 
-  if (is.null(att_names)) {
-    att_names <- paste0("A", seq_len(ncol(probs)))
-  }
   colnames(probs) <- att_names
   rownames(probs) <- NULL
   probs
