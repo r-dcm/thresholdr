@@ -10,3 +10,5 @@
 ^pkgdown$
 ^data-raw$
 ^\.lintr$
+^vignettes/\.quarto$
+^vignettes/*_files$

@@ -1,5 +1,6 @@
 Package: thresholdr
-Title: Estimate Optimal Probability Classification Thresholds for Diagnostic Models
+Title: Estimate Optimal Probability Classification Thresholds for
+    Diagnostic Models
 Version: 0.0.0.9000
 Authors@R: c(
     person("W. Jake", "Thompson", , "wjakethompson@gmail.com", role = c("aut", "cre"),
@@ -9,16 +10,20 @@ Authors@R: c(
            comment = "shapes_to_muphi() and muphi_to_shapes()"),
     person("University of Kansas", role = "cph")
   )
-Description: Diagnostic classification models are confirmatory latent class
-    models that provide probabilities of proficiency for respondents on each of
-    the assessed skills (Bradshaw, 2016 <doi:10.1002/9781118956588.ch13>).
-    Often, results based on these models are reported as classifications, using
-    0.5 as the probability threshold for classification (Bradshaw & Levy,
-    2019 <doi:10.1111/emip.12247>). Instead, we can use resampling methods to
-    estimate a different classification threshold that optimizes sensitivity
-    and specificity.
+Description: Diagnostic classification models are confirmatory latent
+    class models that provide probabilities of proficiency for respondents
+    on each of the assessed skills (Bradshaw, 2016
+    <doi:10.1002/9781118956588.ch13>). Often, results based on these
+    models are reported as classifications, using 0.5 as the probability
+    threshold for classification (Bradshaw & Levy, 2019
+    <doi:10.1111/emip.12247>). Instead, this package estimates an optimal
+    classification threshold for each skill, even when respondents' true
+    classifications are unknown. Thresholds can be approximated by
+    resampling plausible classifications or by iterating toward a
+    self-consistent threshold, and optimized using a range of criteria
+    derived from the receiver operating characteristic curve.
 License: MIT + file LICENSE
-URL: https://thresholdr.measr.info, https://github.com/r-dcm/thresholdr
+URL: https://thresholdr.r-dcm.org, https://github.com/r-dcm/thresholdr
 BugReports: https://github.com/r-dcm/thresholdr/issues
 Depends: 
     R (>= 4.1.0)
@@ -30,22 +35,34 @@ Imports:
     probably,
     purrr,
     rlang,
+    S7,
     tibble,
     tidyr,
     yardstick
 Suggests: 
+    CDM,
+    dcmdata,
+    GDINA,
+    ggplot2,
+    here,
     knitr,
+    measr,
+    quarto,
     rmarkdown,
     spelling,
-    testthat (>= 3.0.0)
-VignetteBuilder: 
-    knitr
-Config/testthat/edition: 3
-Config/Needs/website: r-dcm/rdcmtemplate
+    testthat (>= 3.0.0),
+    withr
+VignetteBuilder:
+    quarto
+Remotes:
+    RConsortium/S7
 Config/Needs/documentation: openpharma/roxylint
-Config/roxylint: list(linters = roxylint::tidy)	
+Config/Needs/website: r-dcm/rdcmtemplate
+Config/roxygen2/version: 8.1.1
+Config/roxylint: list(linters = roxylint::tidy)
+Config/testthat/edition: 3
 Encoding: UTF-8
-LazyData: true
-Roxygen: list(markdown = TRUE, roclets = c("namespace", "rd", "roxylint::roxylint"))
 Language: en-US
-Config/roxygen2/version: 8.0.0
+LazyData: true
+Roxygen: list(markdown = TRUE, roclets = c("namespace", "rd",
+    "roxylint::roxylint"))

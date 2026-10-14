@@ -62,6 +62,29 @@ muphi_to_shapes <- function(mu, phi) {
 }
 
 
+#' Find the Beta mean that corresponds to a given median
+#'
+#' @param median The desired median of the Beta distribution.
+#' @param phi The precision of the Beta distribution.
+#'
+#' @concept Beta
+#'
+#' @return The mean (&mu;) of the Beta distribution with precision `phi` and a
+#'   median of `median`.
+#' @noRd
+median_to_mu <- function(median, phi) {
+  if (median == 0.5) {
+    return(0.5)
+  }
+
+  stats::uniroot(
+    \(mu) stats::pbeta(median, mu * phi, (1 - mu) * phi) - 0.5,
+    interval = c(1e-8, 1 - 1e-8),
+    tol = 1e-10
+  )$root
+}
+
+
 #' Bound a variable between allowable values
 #'
 #' @param x A numeric value.
@@ -74,4 +97,35 @@ muphi_to_shapes <- function(mu, phi) {
 #' @noRd
 bound <- function(x, lb, ub, buffer = 1e-5) {
   pmax(pmin(x, (ub - buffer)), (lb + buffer))
+}
+
+
+#' Generate truth values that include both 0 and 1 values
+#'
+#' @param draw A function with no arguments that returns a vector of `0` and
+#'   `1` integers.
+#' @param max_tries The maximum number of times to call `draw`.
+#' @param call The call stack for the error message.
+#'
+#' @return The first result of `draw()` that contains both `0` and `1` values.
+#'   If the result is of length 1, it is returned immediately.
+#' @noRd
+draw_mixed <- function(draw, max_tries = 100, call = rlang::caller_env()) {
+  for (i in seq_len(max_tries)) {
+    truth <- draw()
+    if (length(truth) < 2 || (any(truth == 0L) && any(truth == 1L))) {
+      return(truth)
+    }
+  }
+
+  cli::cli_abort(
+    c(
+      paste(
+        "Could not generate truth values containing both {.val {0}} and",
+        "{.val {1}} values after {max_tries} attempts."
+      ),
+      i = "Check whether all {.arg estimates} are close to 0 or 1."
+    ),
+    call = call
+  )
 }

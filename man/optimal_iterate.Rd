@@ -6,12 +6,13 @@
 \usage{
 optimal_iterate(
   estimates,
-  weighting_method,
   optimal_method,
   ...,
+  weighting_method = "distance",
   additional_criterion = NULL,
+  chains = 4,
   iter_burnin = 100,
-  iter_retain = 1000,
+  iter_retain = 250,
   comp_thresholds = NULL,
   metrics = NULL
 )
@@ -19,22 +20,25 @@ optimal_iterate(
 \arguments{
 \item{estimates}{A vector of probabilities.}
 
-\item{weighting_method}{The method for generating classifications, weighted
-by the current estimate of the optimal threshold. One of
-"beta", "distance".}
-
 \item{optimal_method}{The method for estimating the optimal threshold. One of
-"youden", "topleft", "cz", "gmean".}
+"youden", "topleft", "cz", "gmean", "iu", "minp".}
 
 \item{...}{Additional arguments passed to the corresponding weighting method.}
+
+\item{weighting_method}{The method for generating classifications, weighted
+by the current estimate of the optimal threshold. One of
+"beta", "distance", "logodds".}
 
 \item{additional_criterion}{Optional. If provided, must be a class
 probability metric from \link[yardstick:yardstick-package]{yardstick}.}
 
-\item{iter_burnin}{The number of iterations to run and then discard (see
-details below).}
+\item{chains}{The number of independent chains to run (see details below).}
 
-\item{iter_retain}{The number of iterations to retain (see details below).}
+\item{iter_burnin}{The number of iterations to run and then discard in each
+chain (see details below).}
+
+\item{iter_retain}{The number of iterations to retain in each chain (see
+details below).}
 
 \item{comp_thresholds}{Additional threshold values to evaluate against the
 average optimal threshold (e.g., to compare the optimal threshold to a
@@ -50,9 +54,10 @@ probabilities. A set of default metrics is used when \code{NULL} (see
 }
 \value{
 A \link[tibble:tibble-package]{tibble} with 1 row per threshold. The
-columns are:
+first row is the optimal threshold, followed by any \code{comp_thresholds} in the
+order they were specified. The columns are:
 \itemize{
-\item \code{.threshold}: The optimal threshold.
+\item \code{threshold}: The optimal threshold and any specified \code{comp_thresholds}.
 \item If \code{additional_criterion} was specified, an \link[posterior:rvar]{rvar}
 containing the distribution of class probability metrics across all
 retained iterations.
@@ -60,38 +65,65 @@ retained iterations.
 performance metrics, containing the distributions across all retained
 iterations (i.e., 1 column per specified metric).
 }
+
+The returned object also has two attributes:
+\itemize{
+\item \code{"converged"}: A logical indicating whether all monitored statistics
+have converged.
+\item \code{"diagnostics"}: A \link[tibble:tibble-package]{tibble} with one row per
+monitored statistic (\code{parameter}) and the \eqn{\hat{R}} (\code{rhat}), bulk
+effective sample size (\code{ess_bulk}), tail effective sample size
+(\code{ess_tail}), and whether the statistic converged (\code{converged}).
+}
 }
 \description{
 Use iteration to estimate an optimal probability threshold when true
 classifications are unknown.
 }
 \details{
-To initialize the iteration process, a vector of "true" values is generated
-using \code{\link[=generate_truth]{generate_truth()}}. Then, the optimal threshold is calculated using the
+The goal of the iteration process is to find a self-consistent threshold.
+That is, a threshold that, when used to generate "true" values, results in
+the same optimal threshold. To initialize the iteration process, a vector of
+"true" values is generated using the method specified by \code{weighting_method}
+and an initial threshold. Then, the optimal threshold is calculated using the
 set of generated "true" values and the specified \code{optimal_method}. A new
 vector of "true" values is then generated, with classifications biased in the
 direction of the calculated optimal threshold using the method specified by
 \code{weighting_method}. That is, \code{estimates} will be less likely to result in a
 classification 1 if the threshold is .8 than if it is .5. Using the updated
 vector of "true" values, a new optimal threshold is calculated. This proceeds
-for the specified number of iterations. The total number of iterations is
-given by \code{iter_burnin + iter_retain}; however, the first \code{iter_burnin}
-iterations are discarded. For example, if you specify 100 burn-in iterations
-and 1,000 retained iterations, a total of 1,100 total iterations will be
-completed, but results will be based only on the final 1,000 iterations.
-The optimal threshold is then calculated as the average of the threshold
-values from the retained iterations.
+for the specified number of iterations. The total number of iterations in
+each chain is given by \code{iter_burnin + iter_retain}; however, the first
+\code{iter_burnin} iterations are discarded. For example, if you specify 100
+burn-in iterations and 250 retained iterations, a total of 350 iterations
+will be completed in each chain, but results will be based only on the final
+250 iterations.
+
+Multiple \code{chains} are run independently, each starting from a different
+initial threshold. When \code{chains = 1}, the initial threshold is .5 (i.e.,
+equivalent to \code{\link[=generate_truth]{generate_truth()}}). Otherwise, initial thresholds are evenly
+spaced from .1 to .9 (e.g., .1, .37, .63, and .9 for 4 chains). Dispersed
+starting values make it possible to detect whether the final threshold
+depends on where the iteration process began. The retained iterations from
+all chains are pooled (i.e., \code{chains * iter_retain} total draws), and the
+optimal threshold is calculated as the average of the threshold values from
+all retained iterations.
 
 Convergence of the iteration process is monitored using the \eqn{\hat{R}}
 statistic described by Vehtari et al. (2021). By default, the \eqn{\hat{R}}
-statistic is calculated for the optimal threshold values that are estimated
-at each iteration. Optionally, users may specify and \code{additional_criterion}
-to be monitored with the \eqn{\hat{R}}. For example, we could calculate the
-area under the ROC curve with the "true" values used at each iteration to
-monitor that value for convergence as well. A warning is produced if the
-threshold or, if specified, the \code{additional_criterion} do not meet the
-convergence criteria of an \eqn{\hat{R}} less than 1.01 recommended by
-Vehtari et al. (2021).
+statistic is calculated across chains for the optimal threshold values that
+are estimated at each iteration. Optionally, users may specify an
+\code{additional_criterion} to be monitored with the \eqn{\hat{R}}.
+For example, we could calculate the area under the ROC curve with the "true"
+values used at each iteration to monitor that value for convergence as well.
+A warning is produced if the threshold or, if specified, the
+\code{additional_criterion} do not meet the convergence criteria of an
+\eqn{\hat{R}} less than 1.01 recommended by Vehtari et al. (2021). The
+\eqn{\hat{R}} is undefined (\code{NA}) when every iteration in every chain
+produces the same value. Because this indicates that the chains agree
+perfectly, the statistic is considered converged. Bulk and tail effective
+sample sizes are also calculated, and all diagnostics are returned in the
+\code{"diagnostics"} attribute of the returned object.
 
 Finally, the average threshold is applied to the samples of "true" values
 that were generated at each iteration to calculate performance metrics for
@@ -106,8 +138,14 @@ are provided by default, specify new \code{metrics}.
 }
 \examples{
 est <- runif(100)
-optimal_iterate(estimates = est, weighting_method = "distance",
-                optimal_method = "youden", iter_retain = 100)
+optimal_iterate(
+  estimates = est,
+  weighting_method = "distance",
+  optimal_method = "youden",
+  chains = 2,
+  iter_burnin = 50,
+  iter_retain = 50
+)
 
 }
 \references{

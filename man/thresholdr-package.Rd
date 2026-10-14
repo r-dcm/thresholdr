@@ -6,12 +6,14 @@
 \alias{thresholdr-package}
 \title{thresholdr: Estimate Optimal Probability Classification Thresholds for Diagnostic Models}
 \description{
-Diagnostic classification models are confirmatory latent class models that provide probabilities of proficiency for respondents on each of the assessed skills (Bradshaw, 2016 \doi{10.1002/9781118956588.ch13}). Often, results based on these models are reported as classifications, using 0.5 as the probability threshold for classification (Bradshaw & Levy, 2019 \doi{10.1111/emip.12247}). Instead, we can use resampling methods to estimate a different classification threshold that optimizes sensitivity and specificity.
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
+Diagnostic classification models are confirmatory latent class models that provide probabilities of proficiency for respondents on each of the assessed skills (Bradshaw, 2016 \doi{10.1002/9781118956588.ch13}). Often, results based on these models are reported as classifications, using 0.5 as the probability threshold for classification (Bradshaw & Levy, 2019 \doi{10.1111/emip.12247}). Instead, this package estimates an optimal classification threshold for each skill, even when respondents' true classifications are unknown. Thresholds can be approximated by resampling plausible classifications or by iterating toward a self-consistent threshold, and optimized using a range of criteria derived from the receiver operating characteristic curve.
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://thresholdr.measr.info}
+  \item \url{https://thresholdr.r-dcm.org}
   \item \url{https://github.com/r-dcm/thresholdr}
   \item Report bugs at \url{https://github.com/r-dcm/thresholdr/issues}
 }

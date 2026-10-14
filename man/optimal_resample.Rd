@@ -17,7 +17,7 @@ optimal_resample(
 \item{estimates}{A vector of probabilities.}
 
 \item{optimal_method}{The method for estimating the optimal threshold. One of
-"youden", "topleft", "cz", "gmean".}
+"youden", "topleft", "cz", "gmean", "iu", "minp".}
 
 \item{samples}{The number of samples of generated true values to create.}
 
@@ -41,9 +41,11 @@ probabilities. A set of default metrics is used when \code{NULL} (see
 }
 \value{
 A \link[tibble:tibble-package]{tibble} with 1 row per threshold. The
-columns are:
+first row is the averaged optimal threshold, followed by any
+\code{comp_thresholds} in the order they were specified. The columns are:
 \itemize{
-\item \code{.threshold}: The averaged optimal threshold.
+\item \code{threshold}: The averaged optimal threshold and any specified
+\code{comp_thresholds}.
 \item If \code{weight_by} was specified, an \link[posterior:rvar]{rvar} containing the
 distribution of class probability metrics across all samples.
 \item A set of \link[posterior:rvar]{rvar} objects for each of the specified

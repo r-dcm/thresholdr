@@ -10,37 +10,56 @@
 #' @param ... Additional arguments passed to the corresponding weighting method.
 #' @param additional_criterion Optional. If provided, must be a class
 #'   probability metric from [yardstick][yardstick::yardstick-package].
-#' @param iter_burnin The number of iterations to run and then discard (see
+#' @param chains The number of independent chains to run (see details below).
+#' @param iter_burnin The number of iterations to run and then discard in each
+#'   chain (see details below).
+#' @param iter_retain The number of iterations to retain in each chain (see
 #'   details below).
-#' @param iter_retain The number of iterations to retain (see details below).
 #'
 #' @details
-#' To initialize the iteration process, a vector of "true" values is generated
-#' using [generate_truth()]. Then, the optimal threshold is calculated using the
+#' The goal of the iteration process is to find a self-consistent threshold.
+#' That is, a threshold that, when used to generate "true" values, results in
+#' the same optimal threshold. To initialize the iteration process, a vector of
+#' "true" values is generated using the method specified by `weighting_method`
+#' and an initial threshold. Then, the optimal threshold is calculated using the
 #' set of generated "true" values and the specified `optimal_method`. A new
 #' vector of "true" values is then generated, with classifications biased in the
 #' direction of the calculated optimal threshold using the method specified by
 #' `weighting_method`. That is, `estimates` will be less likely to result in a
 #' classification 1 if the threshold is .8 than if it is .5. Using the updated
 #' vector of "true" values, a new optimal threshold is calculated. This proceeds
-#' for the specified number of iterations. The total number of iterations is
-#' given by `iter_burnin + iter_retain`; however, the first `iter_burnin`
-#' iterations are discarded. For example, if you specify 100 burn-in iterations
-#' and 1,000 retained iterations, a total of 1,100 total iterations will be
-#' completed, but results will be based only on the final 1,000 iterations.
-#' The optimal threshold is then calculated as the average of the threshold
-#' values from the retained iterations.
+#' for the specified number of iterations. The total number of iterations in
+#' each chain is given by `iter_burnin + iter_retain`; however, the first
+#' `iter_burnin` iterations are discarded. For example, if you specify 100
+#' burn-in iterations and 250 retained iterations, a total of 350 iterations
+#' will be completed in each chain, but results will be based only on the final
+#' 250 iterations.
+#'
+#' Multiple `chains` are run independently, each starting from a different
+#' initial threshold. When `chains = 1`, the initial threshold is .5 (i.e.,
+#' equivalent to [generate_truth()]). Otherwise, initial thresholds are evenly
+#' spaced from .1 to .9 (e.g., .1, .37, .63, and .9 for 4 chains). Dispersed
+#' starting values make it possible to detect whether the final threshold
+#' depends on where the iteration process began. The retained iterations from
+#' all chains are pooled (i.e., `chains * iter_retain` total draws), and the
+#' optimal threshold is calculated as the average of the threshold values from
+#' all retained iterations.
 #'
 #' Convergence of the iteration process is monitored using the \eqn{\hat{R}}
 #' statistic described by Vehtari et al. (2021). By default, the \eqn{\hat{R}}
-#' statistic is calculated for the optimal threshold values that are estimated
-#' at each iteration. Optionally, users may specify and `additional_criterion`
-#' to be monitored with the \eqn{\hat{R}}. For example, we could calculate the
-#' area under the ROC curve with the "true" values used at each iteration to
-#' monitor that value for convergence as well. A warning is produced if the
-#' threshold or, if specified, the `additional_criterion` do not meet the
-#' convergence criteria of an \eqn{\hat{R}} less than 1.01 recommended by
-#' Vehtari et al. (2021).
+#' statistic is calculated across chains for the optimal threshold values that
+#' are estimated at each iteration. Optionally, users may specify an
+#' `additional_criterion` to be monitored with the \eqn{\hat{R}}.
+#' For example, we could calculate the area under the ROC curve with the "true"
+#' values used at each iteration to monitor that value for convergence as well.
+#' A warning is produced if the threshold or, if specified, the
+#' `additional_criterion` do not meet the convergence criteria of an
+#' \eqn{\hat{R}} less than 1.01 recommended by Vehtari et al. (2021). The
+#' \eqn{\hat{R}} is undefined (`NA`) when every iteration in every chain
+#' produces the same value. Because this indicates that the chains agree
+#' perfectly, the statistic is considered converged. Bulk and tail effective
+#' sample sizes are also calculated, and all diagnostics are returned in the
+#' `"diagnostics"` attribute of the returned object.
 #'
 #' Finally, the average threshold is applied to the samples of "true" values
 #' that were generated at each iteration to calculate performance metrics for
@@ -54,22 +73,37 @@
 #' are provided by default, specify new `metrics`.
 #'
 #' @return A [tibble][tibble::tibble-package] with 1 row per threshold. The
-#' columns are:
-#'   * `.threshold`: The optimal threshold.
+#' first row is the optimal threshold, followed by any `comp_thresholds` in the
+#' order they were specified. The columns are:
+#'   * `threshold`: The optimal threshold and any specified `comp_thresholds`.
 #'   * If `additional_criterion` was specified, an [rvar][posterior::rvar()]
 #'     containing the distribution of class probability metrics across all
 #'     retained iterations.
 #'   * A set of [rvar][posterior::rvar()] objects for each of the specified
 #'     performance metrics, containing the distributions across all retained
 #'     iterations (i.e., 1 column per specified metric).
+#'
+#' The returned object also has two attributes:
+#'   * `"converged"`: A logical indicating whether all monitored statistics
+#'     have converged.
+#'   * `"diagnostics"`: A [tibble][tibble::tibble-package] with one row per
+#'     monitored statistic (`parameter`) and the \eqn{\hat{R}} (`rhat`), bulk
+#'     effective sample size (`ess_bulk`), tail effective sample size
+#'     (`ess_tail`), and whether the statistic converged (`converged`).
 #' @export
 #' @family threshold approximation methods
 #' @concept rvar
 #'
 #' @examples
 #' est <- runif(100)
-#' optimal_iterate(estimates = est, weighting_method = "distance",
-#'                 optimal_method = "youden", iter_retain = 100)
+#' optimal_iterate(
+#'   estimates = est,
+#'   weighting_method = "distance",
+#'   optimal_method = "youden",
+#'   chains = 2,
+#'   iter_burnin = 50,
+#'   iter_retain = 50
+#' )
 #'
 #' @references Vehtari, A., Gelman, A., Simpson, D., Carpenter, B., & Bürkner,
 #'   P.-C. (2021). Rank-normalization, folding, and localization: An improved
@@ -77,12 +111,13 @@
 #'   *Bayesian Analysis, 16*(2), 667-718. \doi{10.1214/20-BA1221}
 optimal_iterate <- function(
   estimates,
-  weighting_method,
   optimal_method,
   ...,
+  weighting_method = "distance",
   additional_criterion = NULL,
+  chains = 4,
   iter_burnin = 100,
-  iter_retain = 1000,
+  iter_retain = 250,
   comp_thresholds = NULL,
   metrics = NULL
 ) {
@@ -99,118 +134,75 @@ optimal_iterate <- function(
   } else {
     check_prob_metric(additional_criterion)
   }
-  check_integer(iter_burnin, min = 1, exp_length = 1)
-  check_integer(iter_retain, min = 1, exp_length = 1)
+  rlang::check_number_whole(chains, min = 1)
+  rlang::check_number_whole(iter_burnin, min = 1)
+  rlang::check_number_whole(iter_retain, min = 1)
   check_double(comp_thresholds, min = 0, max = 1, allow_null = TRUE)
 
   # identify needed functions -----
   optimal_function <- get_optimal_function(optimal_method)
   weight_function <- get_weighting_function(weighting_method)
 
-  # initial state -----
-  iter_truth <- generate_truth(estimates)
-  iter_threshold <- optimal_function(estimates = estimates, truth = iter_truth)
-  iter_conv <- converge_function(
-    estimate_tibble(estimates, iter_truth),
-    truth = "truth",
-    "estimate",
-    event_level = "second"
+  # run chains -----
+  inits <- if (chains == 1) 0.5 else seq(0.1, 0.9, length.out = chains)
+  chain <- purrr::imap(
+    inits,
+    \(init, chain_id) {
+      iterate_chain(
+        estimates = estimates,
+        init = init,
+        chain_id = chain_id,
+        optimal_function = optimal_function,
+        weight_function = weight_function,
+        iter_burnin = iter_burnin,
+        iter_retain = iter_retain,
+        ...
+      )
+    }
   ) |>
-    dplyr::pull(".estimate")
+    purrr::list_rbind()
 
-  # burn-in iterations -----
-  for (i in seq_len(iter_burnin)) {
-    iter_truth <- weight_function(estimates, threshold = iter_threshold, ...)
-    iter_threshold <- optimal_function(
-      estimates = estimates,
-      truth = iter_truth
+  draws <- draws_tibble(estimates, chain$truth)
+  chain <- chain |>
+    dplyr::mutate(
+      conv = draw_criterion(draws, converge_function),
+      .draw = dplyr::row_number()
     )
-    iter_conv <- converge_function(
-      estimate_tibble(estimates, iter_truth),
-      truth = "truth",
-      "estimate",
-      event_level = "second"
-    ) |>
-      dplyr::pull(".estimate")
-  }
-
-  # retained iterations -----
-  dat <- vector(mode = "list", length = iter_retain)
-  thr <- vector(mode = "double", length = iter_retain)
-  cnv <- vector(mode = "double", length = iter_retain)
-  for (i in seq_len(iter_retain)) {
-    iter_truth <- weight_function(estimates, threshold = iter_threshold, ...)
-    iter_threshold <- optimal_function(
-      estimates = estimates,
-      truth = iter_truth
-    )
-    iter_conv <- converge_function(
-      estimate_tibble(estimates, iter_truth),
-      truth = "truth",
-      "estimate",
-      event_level = "second"
-    ) |>
-      dplyr::pull(".estimate")
-
-    dat[[i]] <- estimate_tibble(estimates, iter_truth)
-    thr[i] <- iter_threshold
-    cnv[i] <- iter_conv
-  }
 
   # check for convergence -----
-  chain <- tibble::tibble(iteration = seq_len(iter_retain), dat = dat) |>
-    dplyr::mutate(threshold = thr, conv = cnv, mean_thr = mean(.data$threshold))
-
-  chain_diagnostics <- chain |>
-    dplyr::select("threshold", "conv") |>
-    dplyr::summarize(dplyr::across(dplyr::everything(), posterior::rvar)) |>
-    dplyr::rename(!!additional_criterion := "conv") |>
-    tidyr::pivot_longer(
-      cols = dplyr::everything(),
-      names_to = "parameter",
-      values_to = "draws"
-    ) |>
-    dplyr::filter(.data$parameter != "identity") |>
-    dplyr::mutate(
-      chain_summary = purrr::map(
-        .data$draws,
-        \(x) {
-          posterior::summarize_draws(x, "rhat") |>
-            dplyr::select(-"variable")
-        }
+  diag_draws <- list(threshold = chain$threshold)
+  if (additional_criterion != "identity") {
+    diag_draws[[additional_criterion]] <- chain$conv
+  }
+  chain_diagnostics <- purrr::imap(
+    diag_draws,
+    \(x, parameter) {
+      draws <- matrix(x, nrow = iter_retain, ncol = chains)
+      rhat <- posterior::rhat(draws)
+      tibble::tibble(
+        parameter = parameter,
+        rhat = rhat,
+        ess_bulk = posterior::ess_bulk(draws),
+        ess_tail = posterior::ess_tail(draws),
+        converged = statistic_converged(draws, rhat)
       )
-    ) |>
-    tidyr::unnest("chain_summary")
+    }
+  ) |>
+    purrr::list_rbind()
 
   # return results -----
-  results <- chain |>
-    dplyr::mutate(
-      results = purrr::map2(
-        .data$dat,
-        .data$mean_thr,
-        \(x, y, comp, metrics) {
-          probably::threshold_perf(
-            x,
-            truth = "truth",
-            estimate = "estimate",
-            thresholds = c(y, comp),
-            event_level = "second",
-            metrics = metrics
-          ) |>
-            dplyr::select(".threshold", ".metric", ".estimate") |>
-            tidyr::pivot_wider(
-              names_from = ".metric",
-              values_from = ".estimate"
-            )
-        },
-        comp = comp_thresholds,
-        metrics = metrics
-      )
+  eval_thresholds <- c(mean(chain$threshold), comp_thresholds)
+  results <- draw_performance(
+    draws,
+    thresholds = eval_thresholds,
+    metrics = metrics
+  ) |>
+    dplyr::left_join(
+      dplyr::select(chain, ".draw", "chain", "iteration", "conv"),
+      by = ".draw"
     ) |>
 
     # clean-up
-    dplyr::select(-"dat") |>
-    tidyr::unnest("results") |>
     dplyr::mutate(
       conv = dplyr::case_when(
         .data$.threshold %in% comp_thresholds ~ NA_real_,
@@ -219,32 +211,111 @@ optimal_iterate <- function(
     ) |>
     dplyr::rename(!!additional_criterion := "conv") |>
     dplyr::select(
+      "chain",
       "iteration",
       !!additional_criterion,
-      ".threshold":dplyr::last_col(),
+      ".threshold",
+      dplyr::everything(),
+      -".draw",
       -dplyr::any_of("identity")
     ) |>
     dplyr::summarize(
-      dplyr::across(dplyr::where(is.double), posterior::rvar),
+      dplyr::across(
+        dplyr::where(is.double),
+        \(x) posterior::rvar(x, nchains = chains)
+      ),
       .threshold = posterior::E(.data$.threshold),
       .by = ".threshold"
     ) |>
-    dplyr::relocate(".threshold", .before = 1)
+    dplyr::arrange(match(.data$.threshold, eval_thresholds)) |>
+    dplyr::relocate(".threshold", .before = 1) |>
+    dplyr::rename(threshold = ".threshold")
 
   # print diagnostics and return -----
-  if (any(chain_diagnostics$rhat > 1.01)) {
+  attr(results, "diagnostics") <- chain_diagnostics
+  if (!all(chain_diagnostics$converged)) {
     attr(results, "converged") <- FALSE
 
     chain_diagnostics |>
-      dplyr::filter(.data$rhat > 1.01) |>
+      dplyr::filter(!.data$converged) |>
       glue::glue_data(
         "Statistic did not converge (Rhat > 1.01): ",
         "{{.arg {paste(parameter)}}}"
       ) |>
-      cli::cli_warn()
+      cli::cli_warn(class = "thresholdr_warning_convergence")
   } else {
     attr(results, "converged") <- TRUE
   }
 
   results
+}
+
+
+#' Run a single chain of the iteration process
+#'
+#' @inheritParams optimal_iterate
+#' @param init The threshold used to generate the first set of "true" values.
+#' @param chain_id An integer identifying the chain.
+#' @param optimal_function The function used to calculate the optimal threshold.
+#' @param weight_function The function used to generate weighted "true" values.
+#'
+#' @return A [tibble][tibble::tibble-package] with one row per retained
+#'   iteration, containing the generated "true" values (`truth`) and the
+#'   estimated optimal `threshold`.
+#' @noRd
+iterate_chain <- function(
+  estimates,
+  init,
+  chain_id,
+  optimal_function,
+  weight_function,
+  iter_burnin,
+  iter_retain,
+  ...
+) {
+  iter_threshold <- init
+
+  tru <- vector(mode = "list", length = iter_retain)
+  thr <- vector(mode = "double", length = iter_retain)
+  for (i in seq_len(iter_burnin + iter_retain)) {
+    iter_truth <- weight_function(estimates, threshold = iter_threshold, ...)
+    iter_threshold <- optimal_function(
+      estimates = estimates,
+      truth = iter_truth
+    )
+
+    # burn-in iterations are discarded
+    if (i <= iter_burnin) {
+      next
+    }
+
+    tru[[i - iter_burnin]] <- iter_truth
+    thr[i - iter_burnin] <- iter_threshold
+  }
+
+  tibble::tibble(
+    chain = chain_id,
+    iteration = seq_len(iter_retain),
+    truth = tru,
+    threshold = thr
+  )
+}
+
+
+#' Determine whether a monitored statistic has converged
+#'
+#' @param draws A matrix of draws for the statistic, with one column per chain.
+#' @param rhat The \eqn{\hat{R}} calculated from `draws`.
+#'
+#' @return A logical scalar. `TRUE` if `rhat` is less than or equal to 1.01.
+#'   [posterior::rhat()] returns `NA` when all `draws` are identical, which
+#'   indicates perfect agreement between chains, so that is also `TRUE`. Any
+#'   other `NA` (e.g., from missing `draws`) is `FALSE`.
+#' @noRd
+statistic_converged <- function(draws, rhat) {
+  if (is.na(rhat)) {
+    return(!anyNA(draws) && length(unique(as.vector(draws))) == 1L)
+  }
+
+  rhat <= 1.01
 }

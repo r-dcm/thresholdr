@@ -4,6 +4,7 @@
 \alias{generate_truth}
 \alias{generate_beta_wt_truth}
 \alias{generate_distance_wt_truth}
+\alias{generate_logodds_wt_truth}
 \title{Generate binary values from a vector of probabilities}
 \usage{
 generate_truth(estimates, ...)
@@ -11,14 +12,16 @@ generate_truth(estimates, ...)
 generate_beta_wt_truth(estimates, threshold = 0.5, ..., precision = 2)
 
 generate_distance_wt_truth(estimates, threshold = 0.5, ...)
+
+generate_logodds_wt_truth(estimates, threshold = 0.5, ...)
 }
 \arguments{
 \item{estimates}{A vector of probabilities.}
 
 \item{...}{Currently unused.}
 
-\item{threshold}{For Beta- and distance-weighted generation, the probability
-classification threshold.}
+\item{threshold}{For weighted generation, the probability classification
+threshold.}
 
 \item{precision}{For Beta-weighted generation, the precision for the Beta
 distribution. See details for specifics.}
@@ -38,15 +41,19 @@ distribution.
 When using a classification threshold other than .5, you may wish to weight
 the truth generation process. For example, a proficiency estimate of 0.7
 should be more likely to result in a truth value of \code{1} if the classification
-threshold is .5 than if the threshold is .8. There are currently two
-weighting methods implemented: Beta-weighted and distance-weighted.
+threshold is .5 than if the threshold is .8. There are currently three
+weighting methods implemented: Beta-weighted, distance-weighted, and
+log-odds-weighted. For all three methods, a respondent with an estimate equal
+to the \code{threshold} has a .5 probability of a generated truth value of \code{1}.
 
 For Beta-weighted generation we generate a series of random numbers from a
-Beta distribution. The Beta distribution is defined by its mean (\code{threshold})
-and \code{precision}. For proficiency estimate, we draw a random value from the
-Beta distribution. If the random value is less than the estimate, the
-generated truth value is \code{1}, and \code{0} otherwise. When using a flat Beta
-distribution, this method is equivalent to unweighted generation.
+Beta distribution. The Beta distribution is defined by its median
+(\code{threshold}) and \code{precision} (i.e., the mean is chosen such that the median
+of the distribution is equal to \code{threshold}). For each proficiency estimate,
+we draw a random value from the Beta distribution. If the random value is
+less than the estimate, the generated truth value is \code{1}, and \code{0} otherwise.
+When the \code{threshold} is .5 and the \code{precision} is 2 (i.e., a flat Beta
+distribution), this method is equivalent to unweighted generation.
 
 For distance-weighted generation, the \code{threshold} is subtracted from each
 proficiency estimate. We then add .5 to each difference, creating new
@@ -58,6 +65,26 @@ proficient. Respondents with an original estimate equal to the \code{threshold}
 will always have a new estimate of .5. The new estimates are then used to
 generate truth values using \code{\link[=rbern]{rbern()}}. When the \code{threshold} is set to .5,
 this method is equivalent to unweighted generation.
+
+For log-odds-weighted generation, the log-odds of the \code{threshold} are
+subtracted from the log-odds of each proficiency estimate, and the result is
+converted back to the probability scale. For example, if we specified a
+\code{threshold} of 0.6, respondents with an original proficiency estimate of .8
+would have a new proficiency estimate of
+\code{plogis(qlogis(.8) - qlogis(.6)) = .73}. This is equivalent to adjusting the
+prior odds of proficiency, and unlike distance-weighted generation, the new
+estimates never need to be truncated to remain within [0, 1]. The new
+estimates are then used to generate truth values using \code{\link[=rbern]{rbern()}}. When the
+\code{threshold} is set to .5, this method is equivalent to unweighted
+generation.
+
+To ensure that the generated values can be used to calculate a receiver
+operating characteristic curve, all generation methods require that the
+generated truth values include both \code{0} and \code{1} values. If a set of
+generated values contains only \code{0} or only \code{1} values, the values are
+re-generated, up to 100 attempts. If valid values cannot be generated
+(e.g., if all \code{estimates} are 0), an error is returned. This requirement is
+not applied when \code{estimates} is of length 1.
 }
 \examples{
 generate_truth(runif(10))
@@ -65,6 +92,8 @@ generate_truth(runif(10))
 generate_beta_wt_truth(runif(10), threshold = 0.7, precision = 5)
 
 generate_distance_wt_truth(runif(10), threshold = 0.6)
+
+generate_logodds_wt_truth(runif(10), threshold = 0.6)
 }
 \author{
 W. Jake Thompson

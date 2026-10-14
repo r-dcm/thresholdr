@@ -21,24 +21,30 @@ Calculate the optimal probability classification threshold using Youden's J
 statistic.
 }
 \details{
-Youden's J statistic (Youden, 1950) is defined as \code{sensitivty} +
+Youden's J statistic (Youden, 1950) is defined as \code{sensitivity} +
 \code{specificity} - 1. As such, the value of the J-index ranges from [0, 1],
-and is 1 when there are no false positive and no false negatives (i.e.,
-sensitivity and specificity). The J-index is calculated for each possible
-threshold defined by the ROC curve (e.g., \code{\link[=create_roc]{create_roc()}}).  The optimality
-criterion is then defined as:
+and is 1 when there are no false positives and no false negatives (i.e.,
+perfect sensitivity and specificity). The J-index is calculated for each
+possible threshold defined by the ROC curve (e.g., \code{\link[=create_roc]{create_roc()}}). The
+optimality criterion is then defined as:
 
 \deqn{\text{max}(sensitivity + specificity - 1)}
 }
 \examples{
-calc_youden(estimates = dcm_probs$att1$estimate,
-            truth = dcm_probs$att1$truth)
+calc_youden(
+  estimates = dcm_probs$att1$estimate,
+  truth = dcm_probs$att1$truth
+)
 
-calc_youden(estimates = dcm_probs$att2$estimate,
-            truth = dcm_probs$att2$truth)
+calc_youden(
+  estimates = dcm_probs$att2$estimate,
+  truth = dcm_probs$att2$truth
+)
 
-calc_youden(estimates = dcm_probs$att3$estimate,
-            truth = dcm_probs$att3$truth)
+calc_youden(
+  estimates = dcm_probs$att3$estimate,
+  truth = dcm_probs$att3$truth
+)
 
 }
 \references{
@@ -50,6 +56,8 @@ Youden, W. J. (1950). Index for rating diagnostic tests.
 Other optimal threshold methods:
 \code{\link[=calc_cz]{calc_cz()}},
 \code{\link[=calc_gmean]{calc_gmean()}},
+\code{\link[=calc_iu]{calc_iu()}},
+\code{\link[=calc_minp]{calc_minp()}},
 \code{\link[=calc_topleft]{calc_topleft()}}
 }
 \concept{J}

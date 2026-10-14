@@ -8,15 +8,15 @@ test_that("iteration works", {
 
   expect_equal(
     colnames(it_youden),
-    c(".threshold", "sensitivity", "specificity", "j_index", "distance")
+    c("threshold", "sensitivity", "specificity", "j_index", "distance")
   )
-  expect_equal(typeof(it_youden$.threshold), "double")
+  expect_equal(typeof(it_youden$threshold), "double")
   expect_s3_class(it_youden$sensitivity, "rvar")
   expect_s3_class(it_youden$specificity, "rvar")
   expect_s3_class(it_youden$j_index, "rvar")
   expect_s3_class(it_youden$distance, "rvar")
 
-  expect_equal(length(it_youden$.threshold), 1L)
+  expect_equal(length(it_youden$threshold), 1L)
   expect_equal(posterior::ndraws(it_youden$sensitivity), 1000L)
   expect_equal(posterior::ndraws(it_youden$specificity), 1000L)
   expect_equal(posterior::ndraws(it_youden$j_index), 1000L)
@@ -28,14 +28,15 @@ test_that("additional criteria works", {
     estimates = dcm_probs$att1$estimate,
     weighting_method = "beta",
     optimal_method = "topleft",
-    iter_retain = 250,
+    chains = 2,
+    iter_retain = 125,
     additional_criterion = "roc_auc"
   )
 
   expect_equal(
     colnames(it_topleft),
     c(
-      ".threshold",
+      "threshold",
       "roc_auc",
       "sensitivity",
       "specificity",
@@ -43,14 +44,14 @@ test_that("additional criteria works", {
       "distance"
     )
   )
-  expect_equal(typeof(it_topleft$.threshold), "double")
+  expect_equal(typeof(it_topleft$threshold), "double")
   expect_s3_class(it_topleft$roc_auc, "rvar")
   expect_s3_class(it_topleft$sensitivity, "rvar")
   expect_s3_class(it_topleft$specificity, "rvar")
   expect_s3_class(it_topleft$j_index, "rvar")
   expect_s3_class(it_topleft$distance, "rvar")
 
-  expect_equal(length(it_topleft$.threshold), 1L)
+  expect_equal(length(it_topleft$threshold), 1L)
   expect_equal(posterior::ndraws(it_topleft$roc_auc), 250L)
   expect_equal(posterior::ndraws(it_topleft$sensitivity), 250L)
   expect_equal(posterior::ndraws(it_topleft$specificity), 250L)
@@ -63,7 +64,7 @@ test_that("metrics work", {
     estimates = dcm_probs$att1$estimate,
     optimal_method = "topleft",
     weighting_method = "distance",
-    iter_retain = 100,
+    iter_retain = 25,
     metrics = yardstick::metric_set(
       yardstick::precision,
       yardstick::f_meas,
@@ -73,14 +74,14 @@ test_that("metrics work", {
 
   expect_equal(
     colnames(it_topleft),
-    c(".threshold", "precision", "f_meas", "kap")
+    c("threshold", "precision", "f_meas", "kap")
   )
-  expect_equal(typeof(it_topleft$.threshold), "double")
+  expect_equal(typeof(it_topleft$threshold), "double")
   expect_s3_class(it_topleft$precision, "rvar")
   expect_s3_class(it_topleft$f_meas, "rvar")
   expect_s3_class(it_topleft$kap, "rvar")
 
-  expect_equal(length(it_topleft$.threshold), 1L)
+  expect_equal(length(it_topleft$threshold), 1L)
   expect_equal(posterior::ndraws(it_topleft$precision), 100L)
   expect_equal(posterior::ndraws(it_topleft$f_meas), 100L)
   expect_equal(posterior::ndraws(it_topleft$kap), 100L)
@@ -90,7 +91,8 @@ test_that("metrics work", {
     optimal_method = "youden",
     weighting_method = "distance",
     additional_criterion = "gain_capture",
-    iter_retain = 250,
+    chains = 2,
+    iter_retain = 125,
     metrics = yardstick::metric_set(
       yardstick::recall,
       yardstick::ppv
@@ -99,14 +101,14 @@ test_that("metrics work", {
 
   expect_equal(
     colnames(it_youden),
-    c(".threshold", "gain_capture", "recall", "ppv")
+    c("threshold", "gain_capture", "recall", "ppv")
   )
-  expect_equal(typeof(it_youden$.threshold), "double")
+  expect_equal(typeof(it_youden$threshold), "double")
   expect_s3_class(it_youden$gain_capture, "rvar")
   expect_s3_class(it_youden$recall, "rvar")
   expect_s3_class(it_youden$ppv, "rvar")
 
-  expect_equal(length(it_youden$.threshold), 1L)
+  expect_equal(length(it_youden$threshold), 1L)
   expect_equal(posterior::ndraws(it_youden$gain_capture), 250L)
   expect_equal(posterior::ndraws(it_youden$recall), 250L)
   expect_equal(posterior::ndraws(it_youden$ppv), 250L)
@@ -119,7 +121,7 @@ test_that("comparison thresholds work", {
     weighting_method = "distance",
     additional_criterion = "pr_auc",
     comp_thresholds = c(0.5, 0.8),
-    iter_retain = 200,
+    iter_retain = 50,
     metrics = yardstick::metric_set(
       yardstick::sens,
       yardstick::spec,
@@ -129,15 +131,15 @@ test_that("comparison thresholds work", {
 
   expect_equal(
     colnames(it_youden),
-    c(".threshold", "pr_auc", "sens", "spec", "ppv")
+    c("threshold", "pr_auc", "sens", "spec", "ppv")
   )
-  expect_equal(typeof(it_youden$.threshold), "double")
+  expect_equal(typeof(it_youden$threshold), "double")
   expect_s3_class(it_youden$pr_auc, "rvar")
   expect_s3_class(it_youden$sens, "rvar")
   expect_s3_class(it_youden$spec, "rvar")
   expect_s3_class(it_youden$ppv, "rvar")
 
-  expect_equal(length(it_youden$.threshold), 3L)
+  expect_equal(length(it_youden$threshold), 3L)
   expect_equal(
     vapply(it_youden$pr_auc, posterior::ndraws, integer(1)),
     c(200L, 200L, 200L)
@@ -186,4 +188,90 @@ test_that("comparison thresholds work", {
     ),
     c(0, 0, 0)
   )
+})
+
+test_that("chains and diagnostics work", {
+  it_logodds <- optimal_iterate(
+    estimates = dcm_probs$att1$estimate,
+    optimal_method = "youden",
+    weighting_method = "logodds",
+    additional_criterion = "roc_auc",
+    chains = 3,
+    iter_burnin = 20,
+    iter_retain = 40
+  )
+
+  expect_equal(posterior::ndraws(it_logodds$sensitivity), 120L)
+  expect_equal(posterior::nchains(it_logodds$sensitivity), 3L)
+  expect_type(attr(it_logodds, "converged"), "logical")
+
+  diag <- attr(it_logodds, "diagnostics")
+  expect_equal(
+    colnames(diag),
+    c("parameter", "rhat", "ess_bulk", "ess_tail", "converged")
+  )
+  expect_equal(diag$parameter, c("threshold", "roc_auc"))
+  expect_true(all(is.finite(diag$rhat)))
+  expect_type(diag$converged, "logical")
+  expect_equal(attr(it_logodds, "converged"), all(diag$converged))
+
+  it_single <- suppressWarnings(
+    optimal_iterate(
+      estimates = dcm_probs$att1$estimate,
+      optimal_method = "youden",
+      weighting_method = "distance",
+      chains = 1,
+      iter_burnin = 20,
+      iter_retain = 40
+    )
+  )
+  expect_equal(posterior::ndraws(it_single$sensitivity), 40L)
+  expect_equal(attr(it_single, "diagnostics")$parameter, "threshold")
+})
+
+test_that("optimal threshold is first, then comparison thresholds", {
+  it_youden <- suppressWarnings(
+    optimal_iterate(
+      estimates = dcm_probs$att1$estimate,
+      optimal_method = "youden",
+      weighting_method = "distance",
+      chains = 2,
+      iter_burnin = 10,
+      iter_retain = 10,
+      comp_thresholds = c(0.8, 0.05, 0.5)
+    )
+  )
+
+  expect_equal(nrow(it_youden), 4L)
+  expect_false(it_youden$threshold[1] %in% c(0.8, 0.05, 0.5))
+  expect_equal(it_youden$threshold[-1], c(0.8, 0.05, 0.5))
+})
+
+test_that("undefined rhat is handled", {
+  # all draws identical: chains agree perfectly
+  expect_true(statistic_converged(matrix(0.5, 10, 2), rhat = NA_real_))
+  # missing draws: convergence cannot be assessed
+  draws <- matrix(runif(20), 10, 2)
+  draws[1, 1] <- NA
+  expect_false(statistic_converged(draws, rhat = NA_real_))
+  # otherwise, compare to the 1.01 cut-off
+  expect_true(statistic_converged(draws, rhat = 1.01))
+  expect_false(statistic_converged(draws, rhat = 1.02))
+  expect_false(statistic_converged(draws, rhat = Inf))
+
+  # well-separated estimates give the same threshold at every iteration
+  withr::local_seed(1213)
+  expect_no_warning(
+    it_constant <- optimal_iterate(
+      estimates = c(rep(0.02, 50), rep(0.98, 50)),
+      optimal_method = "youden",
+      chains = 2,
+      iter_burnin = 5,
+      iter_retain = 10
+    )
+  )
+  diag <- attr(it_constant, "diagnostics")
+  expect_true(is.na(diag$rhat))
+  expect_true(diag$converged)
+  expect_true(attr(it_constant, "converged"))
 })

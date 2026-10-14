@@ -51,8 +51,10 @@
 #' `metrics`.
 #'
 #' @return A [tibble][tibble::tibble-package] with 1 row per threshold. The
-#' columns are:
-#'   * `.threshold`: The averaged optimal threshold.
+#' first row is the averaged optimal threshold, followed by any
+#' `comp_thresholds` in the order they were specified. The columns are:
+#'   * `threshold`: The averaged optimal threshold and any specified
+#'     `comp_thresholds`.
 #'   * If `weight_by` was specified, an [rvar][posterior::rvar()] containing the
 #'     distribution of class probability metrics across all samples.
 #'   * A set of [rvar][posterior::rvar()] objects for each of the specified
@@ -88,85 +90,42 @@ optimal_resample <- function(
   # identify needed functions -----
   optimal_function <- get_optimal_function(optimal_method)
 
-  # calculate optimal threshold and performance -----
-  tibble::tibble(sample_id = seq_len(samples), estimates = list(estimates)) |>
+  # create data -----
+  truths <- lapply(seq_len(samples), \(x) generate_truth(estimates))
+  draws <- draws_tibble(estimates, truths)
 
-    # create data
-    dplyr::mutate(
-      truth = lapply(estimates, generate_truth),
-      dat = purrr::map2(.data$estimates, .data$truth, estimate_tibble)
-    ) |>
+  # calculate thresholds -----
+  thresholds <- vapply(
+    truths,
+    \(x) optimal_function(estimates = estimates, truth = x),
+    double(1)
+  )
+  wt_func <- draw_criterion(draws, weight_function)
+  weight <- if (weight_by == "identity") {
+    rep(1, samples)
+  } else {
+    vapply(wt_func, \(x) 1 / sum(abs(x - wt_func)), double(1))
+  }
+  wt_threshold <- stats::weighted.mean(thresholds, weight)
 
-    # calculate thresholds
+  # calculate performance -----
+  eval_thresholds <- c(wt_threshold, comp_thresholds)
+  draw_performance(
+    draws,
+    thresholds = eval_thresholds,
+    metrics = metrics
+  ) |>
     dplyr::mutate(
-      threshold = purrr::map2_dbl(
-        .data$estimates,
-        .data$truth,
-        optimal_function
-      ),
-      wt_func = purrr::map_dbl(
-        .data$dat,
-        \(x) {
-          weight_function(
-            x,
-            truth = "truth",
-            "estimate",
-            event_level = "second"
-          ) |>
-            dplyr::pull(.data$.estimate)
-        }
-      ),
-      weight = purrr::map_dbl(
-        .data$wt_func,
-        \(x, full, weight_by) {
-          if (weight_by == "identity") {
-            return(1)
-          }
-          1 / sum(abs(x - full))
-        },
-        full = .data$wt_func,
-        weight_by = weight_by
-      ),
-      wt_threshold = stats::weighted.mean(.data$threshold, .data$weight)
-    ) |>
-
-    # calculate performance
-    dplyr::mutate(
-      results = purrr::map2(
-        .data$dat,
-        .data$wt_threshold,
-        \(x, y, comp, metrics) {
-          probably::threshold_perf(
-            x,
-            truth = "truth",
-            estimate = "estimate",
-            thresholds = c(y, comp),
-            event_level = "second",
-            metrics = metrics
-          ) |>
-            dplyr::select(".threshold", ".metric", ".estimate") |>
-            tidyr::pivot_wider(
-              names_from = ".metric",
-              values_from = ".estimate"
-            )
-        },
-        comp = comp_thresholds,
-        metrics = metrics
+      wt_func = dplyr::case_when(
+        .data$.threshold %in% comp_thresholds ~ NA_real_,
+        .default = wt_func[.data$.draw]
       )
     ) |>
 
     # clean-up
-    dplyr::select(-c("estimates", "truth", "dat")) |>
-    tidyr::unnest("results") |>
-    dplyr::mutate(
-      wt_func = dplyr::case_when(
-        .data$.threshold %in% comp_thresholds ~ NA_real_,
-        .default = .data$wt_func
-      )
-    ) |>
     dplyr::rename(!!weight_by := "wt_func") |>
     dplyr::select(
-      "sample_id",
+      ".draw",
       !!weight_by,
       ".threshold":dplyr::last_col(),
       -dplyr::any_of("identity")
@@ -176,5 +135,7 @@ optimal_resample <- function(
       .threshold = posterior::E(.data$.threshold),
       .by = ".threshold"
     ) |>
-    dplyr::relocate(".threshold", .before = 1)
+    dplyr::arrange(match(.data$.threshold, eval_thresholds)) |>
+    dplyr::relocate(".threshold", .before = 1) |>
+    dplyr::rename(threshold = ".threshold")
 }

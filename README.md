@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# thresholdr
+# thresholdr <a href="https://thresholdr.r-dcm.org"><img src="man/figures/logo.png" align="right" height="138" alt="thresholdr website" /></a>
 
 <!-- badges: start -->
 
@@ -29,36 +29,38 @@ remotes::install_github("r-dcm/thresholdr")
 
 ## Example usage
 
-There the true classifications are known, we can determine the optimal
-threshold using a supported method, such as Youden’s J statistic. For
-example, using simulated data where the true attribute classifications
-are known, we can calculate the optimal probability classification
-threshold using `calc_youden()`:
+When the true classifications are known, we can calculate the optimal
+threshold directly using a supported method, such as Youden’s J
+statistic. For example, `dcm_probs` contains estimated probabilities of
+proficiency from a simulated diagnostic classification model, along with
+the true classifications:
 
 ``` r
 library(thresholdr)
 
-calc_youden(estimates = dcm_probs$att1$estimate,
-            truth = dcm_probs$att1$truth)
+calc_youden(estimates = dcm_probs$att1$estimate, truth = dcm_probs$att1$truth)
 #> [1] 0.3170266
 ```
 
-However, in practice the true attribute classifications are unknown. In
-this scenario, we can estimate what the optimal threshold should be
-using, for example, resampling:
+In practice, however, the true classifications are unknown. Instead, we
+can estimate the optimal threshold from the probabilities alone, for
+example by resampling, and compare it to the traditional threshold of
+0.5:
 
 ``` r
-optimal_resample(estimates = dcm_probs$att1$estimate, optimal_method = "youden")
-#> # A tibble: 1 × 4
-#>   .threshold  sensitivity   specificity      j_index
-#>        <dbl>   <rvar[1d]>    <rvar[1d]>   <rvar[1d]>
-#> 1      0.381  0.89 ± 0.02  0.91 ± 0.012  0.8 ± 0.025
+set.seed(1213)
+optimal_resample(
+  estimates = dcm_probs$att1$estimate,
+  optimal_method = "youden",
+  comp_thresholds = 0.5
+)
+#> # A tibble: 2 × 5
+#>   threshold   sensitivity   specificity       j_index        distance
+#>       <dbl>    <rvar[1d]>    <rvar[1d]>    <rvar[1d]>      <rvar[1d]>
+#> 1     0.371  0.89 ± 0.020  0.91 ± 0.012  0.80 ± 0.025  0.021 ± 0.0053
+#> 2     0.5    0.86 ± 0.021  0.94 ± 0.011  0.79 ± 0.026  0.025 ± 0.0067
 ```
 
-This results in a threshold that is similar, although slightly higher,
-than what we know the true optimal threshold should be. We can also
-visualize our estimate on an ROC curve. Here again we see that our
-estimated optimal threshold from the resamples are very close to the
-true value.
-
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+To estimate thresholds for every attribute in a model fitted with
+`{measr}`, `{GDINA}`, or `{CDM}`, use `find_threshold()`. For a complete
+walk-through, see the `vignette("thresholdr")` article.

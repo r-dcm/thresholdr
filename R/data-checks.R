@@ -4,8 +4,8 @@
 #' @param must The requirement for input values that is not met.
 #' @param not The current state of `argument` that is problematic.
 #' @param extra Additional text to add to the error message.
-#' @param custom A custom error message to override the defaul message of `must`
-#'   + `not` + `extra`.
+#' @param custom A custom error message to override the default message of
+#'   `must` + `not` + `extra`.
 #' @param call The call stack.
 #'
 #' @return An error message created by [cli::cli_abort()].
@@ -54,6 +54,10 @@ check_double <- function(
   arg = rlang::caller_arg(x),
   call = rlang::caller_env()
 ) {
+  if (valid_numeric(x, whole = FALSE, ...)) {
+    return(check_length(x = x, exp_length = exp_length, arg = arg, call = call))
+  }
+
   for (i in seq_along(x)) {
     rlang::check_number_decimal(x[i], ..., arg = arg, call = call)
   }
@@ -74,6 +78,10 @@ check_integer <- function(
   arg = rlang::caller_arg(x),
   call = rlang::caller_env()
 ) {
+  if (valid_numeric(x, whole = TRUE, ...)) {
+    return(check_length(x = x, exp_length = exp_length, arg = arg, call = call))
+  }
+
   for (i in seq_along(x)) {
     rlang::check_number_whole(x[i], ..., arg = arg, call = call)
   }
@@ -85,12 +93,56 @@ check_integer <- function(
 }
 
 
+#' Quickly determine whether a numeric vector is valid
+#'
+#' A vectorized fast path for `check_double()` and `check_integer()`. Returns
+#' `TRUE` only when every element of `x` would pass
+#' [rlang::check_number_decimal()] (or [rlang::check_number_whole()] when
+#' `whole = TRUE`). When `FALSE`, the element-wise checks should be run to
+#' produce the appropriate error message.
+#'
+#' @param x The input value to be checked.
+#' @param whole Whether values must be whole numbers.
+#' @param ... Other arguments passed to the rlang checks (ignored).
+#' @param min,max The minimum and maximum allowable values.
+#' @param allow_infinite Whether infinite values are allowed. Defaults match
+#'   [rlang::check_number_decimal()] and [rlang::check_number_whole()].
+#'
+#' @return A logical scalar.
+#' @noRd
+valid_numeric <- function(
+  x,
+  whole,
+  ...,
+  min = NULL,
+  max = NULL,
+  allow_infinite = !whole
+) {
+  if (!is.numeric(x) || is.object(x) || !length(x) || anyNA(x)) {
+    return(FALSE)
+  }
+  if (!allow_infinite && !all(is.finite(x))) {
+    return(FALSE)
+  }
+  if (whole && !all(x == trunc(x))) {
+    return(FALSE)
+  }
+  if (!is.null(min) && any(x < min)) {
+    return(FALSE)
+  }
+  if (!is.null(max) && any(x > max)) {
+    return(FALSE)
+  }
+  TRUE
+}
+
+
 #' Check class probability metric
 #'
 #' @param x A character vector. Should be the name of a class probability metric
 #'  from the yardstick package (e.g., `"roc_auc"`, `"brier_class"`).
 #' @param arg The argument name for the error message.
-#' @param call The call stack for the error mesasge.
+#' @param call The call stack for the error message.
 #'
 #' @return If `x` is the name of a valid probability metric from yardstick, that
 #'   function is returned. Otherwise, an error message is returned with
